@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useTimeTracker } from '@/hooks/useTimeTracker';
 import { getVisibleTasks } from '@/utils/taskHelpers';
 import { Header } from './Header';
@@ -20,6 +21,9 @@ export function TimeTrackerApp() {
     setCurrentMonth
   } = useTimeTracker();
 
+  // Hover state for task highlighting
+  const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null);
+
   const handleTaskAdd = (parentId: string | null) => {
     const name = prompt('Enter task name:');
     if (name?.trim()) {
@@ -33,8 +37,8 @@ export function TimeTrackerApp() {
 
   if (state.isLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-gray-500 dark:text-gray-400">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-foreground)' }}>
+        <div className="opacity-60">Loading...</div>
       </div>
     );
   }
@@ -43,7 +47,7 @@ export function TimeTrackerApp() {
   const visibleTasks = getVisibleTasks(state.tasks);
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-foreground)' }}>
       <Header
         currentMonth={state.currentMonth}
         onMonthChange={setCurrentMonth}
@@ -57,12 +61,13 @@ export function TimeTrackerApp() {
           onTaskAdd={handleTaskAdd}
           onTaskEdit={handleTaskEdit}
           onTaskDelete={deleteTask}
+          hoveredTaskId={hoveredTaskId}
         />
 
         <div className="flex-1 flex flex-col overflow-hidden">
           <TimeGrid currentMonth={state.currentMonth} timeEntries={state.timeEntries} />
 
-          <div className="flex-1 overflow-y-auto bg-gray-200 dark:bg-gray-700">
+          <div className="flex-1 overflow-y-auto" style={{ backgroundColor: 'var(--color-background)' }}>
             {visibleTasks.map((task) => (
               <TaskTimeRow
                 key={task.id}
@@ -75,6 +80,7 @@ export function TimeTrackerApp() {
                 onUpdateTime={updateTimeEntry}
                 onStartTimer={startTimer}
                 onStopTimer={stopTimer}
+                onTaskHover={setHoveredTaskId}
               />
             ))}
           </div>

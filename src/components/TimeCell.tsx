@@ -114,11 +114,20 @@ export function TimeCell({
 
   return (
     <div
-      className={`
-        h-full w-full flex items-center justify-center text-sm relative group
-        ${task.trackingType === 'manual' && !hasTimer ? 'cursor-pointer hover:bg-opacity-75' : ''}
-        ${hasTimer ? 'bg-blue-100 dark:bg-blue-900/30' : ''}
-      `}
+      className="h-full w-full flex items-center justify-center text-sm relative group cursor-pointer"
+      style={{
+        backgroundColor: hasTimer ? 'var(--color-orange-light, #dbeafe)' : 'transparent'
+      }}
+      onMouseEnter={(e) => {
+        if (task.trackingType === 'manual' && !hasTimer) {
+          e.currentTarget.style.backgroundColor = 'var(--color-orange-light, rgba(0,0,0,0.05))';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (task.trackingType === 'manual' && !hasTimer) {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }
+      }}
       onClick={handleCellClick}
     >
       {isEditing ? (
@@ -129,7 +138,11 @@ export function TimeCell({
           onChange={(e) => setInputValue(e.target.value)}
           onBlur={handleInputSubmit}
           onKeyDown={handleInputKeyDown}
-          className="w-full h-full px-1 text-center text-sm bg-white dark:bg-gray-700 border-none outline-none"
+          className="w-full h-full px-1 text-center text-sm border-none outline-none"
+          style={{
+            backgroundColor: 'var(--color-background)',
+            color: 'var(--color-foreground)'
+          }}
           step="0.1"
           min="0"
         />
@@ -138,10 +151,11 @@ export function TimeCell({
           {task.trackingType === 'automatic' && (
             <button
               onClick={handleTimerToggle}
-              className={`
-                absolute inset-0 flex items-center justify-center
-                ${hasTimer ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}
-              `}
+              className="absolute inset-0 flex items-center justify-center"
+              style={{
+                color: hasTimer ? 'var(--color-orange-primary, #2563eb)' : 'var(--color-foreground)',
+                opacity: hasTimer ? '1' : '0.6'
+              }}
               title={hasTimer ? 'Stop timer' : 'Start timer'}
             >
               {hasTimer ? (
@@ -158,10 +172,11 @@ export function TimeCell({
 
           {/* Display time value */}
           <span
-            className={`
-              ${task.trackingType === 'automatic' ? 'absolute bottom-0 right-0 px-1 text-xs' : ''}
-              ${hasTimer ? 'text-blue-600 dark:text-blue-400 font-medium' : 'text-gray-700 dark:text-gray-300'}
-            `}
+            className={`${task.trackingType === 'automatic' ? 'absolute bottom-0 right-0 px-1 text-xs' : ''} ${hasTimer ? 'font-medium' : ''}`}
+            style={{
+              color: hasTimer ? 'var(--color-orange-primary, #2563eb)' : 'var(--color-foreground)',
+              opacity: hasTimer ? '1' : '0.9'
+            }}
           >
             {formatDisplayValue()}
           </span>

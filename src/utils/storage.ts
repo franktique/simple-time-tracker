@@ -133,7 +133,7 @@ export class StorageManager {
   }
 
   private static migrateIfNeeded(): void {
-    const currentVersion = this.loadData(STORAGE_KEYS.VERSION, '0.0.0');
+    const currentVersion: string = this.loadData(STORAGE_KEYS.VERSION, '0.0.0');
 
     if (currentVersion !== CURRENT_VERSION) {
       console.log(`Migrating storage from ${currentVersion} to ${CURRENT_VERSION}`);

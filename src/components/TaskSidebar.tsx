@@ -9,6 +9,7 @@ interface TaskSidebarProps {
   onTaskAdd: (parentId: string | null) => void;
   onTaskEdit: (taskId: string, name: string) => void;
   onTaskDelete: (taskId: string) => void;
+  hoveredTaskId: string | null;
 }
 
 export function TaskSidebar({
@@ -16,7 +17,8 @@ export function TaskSidebar({
   onTaskToggle,
   onTaskAdd,
   onTaskEdit,
-  onTaskDelete
+  onTaskDelete,
+  hoveredTaskId
 }: TaskSidebarProps) {
   const rootTasks = Object.values(tasks)
     .filter(task => task.parentId === null)
@@ -31,19 +33,53 @@ export function TaskSidebar({
   const { logged, target } = getTotalHours();
 
   return (
-    <div className="w-80 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+    <div
+      className="w-80 border-r flex flex-col"
+      style={{
+        backgroundColor: 'var(--color-background-secondary, var(--color-background))',
+        borderColor: 'var(--color-orange-primary, var(--color-foreground))',
+        borderOpacity: '0.3'
+      }}
+    >
       {/* Activities header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+      <div
+        className="p-4 border-b"
+        style={{
+          borderColor: 'var(--color-orange-primary, var(--color-foreground))',
+          borderOpacity: '0.2',
+          backgroundColor: 'var(--color-background-surface, var(--color-background))'
+        }}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <button className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+            <button
+              className="p-1 rounded transition-colors"
+              style={{
+                backgroundColor: 'transparent',
+                color: 'var(--color-orange-primary, var(--color-foreground))'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--color-orange-light, rgba(0,0,0,0.1))';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+            >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            <h2 className="font-semibold text-gray-900 dark:text-gray-100">Activities</h2>
+            <h2
+              className="font-semibold"
+              style={{ color: 'var(--color-orange-primary, var(--color-foreground))' }}
+            >
+              Activities
+            </h2>
           </div>
-          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+          <span
+            className="text-sm font-medium"
+            style={{ color: 'var(--color-orange-primary, var(--color-foreground))', opacity: '0.8' }}
+          >
             {logged}/{target}
           </span>
         </div>
@@ -62,13 +98,28 @@ export function TaskSidebar({
               onEdit={onTaskEdit}
               onDelete={onTaskDelete}
               onAdd={onTaskAdd}
+              hoveredTaskId={hoveredTaskId}
             />
           ))}
 
           {/* Add new root task button */}
           <button
             onClick={() => onTaskAdd(null)}
-            className="w-full p-2 mt-2 text-left text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+            className="w-full p-2 mt-2 text-left text-sm rounded-md transition-colors"
+            style={{
+              color: 'var(--color-orange-primary, var(--color-foreground))',
+              backgroundColor: 'transparent',
+              border: `1px solid var(--color-orange-primary, var(--color-foreground))`,
+              borderOpacity: '0.3'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--color-orange-light, rgba(0,0,0,0.1))';
+              e.currentTarget.style.borderColor = 'var(--color-orange-hover, var(--color-foreground))';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.borderColor = 'var(--color-orange-primary, var(--color-foreground))';
+            }}
           >
             + Add new category
           </button>

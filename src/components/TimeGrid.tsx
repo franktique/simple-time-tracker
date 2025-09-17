@@ -28,9 +28,15 @@ export function TimeGrid({ currentMonth, timeEntries }: TimeGridProps) {
     <div className="overflow-x-auto">
       <div className="min-w-max">
         {/* Two-row header system */}
-        <div className="sticky top-0 z-10 bg-gray-200 dark:bg-gray-700">
+        <div
+          className="sticky top-0 z-10"
+          style={{ backgroundColor: 'var(--color-background-secondary, var(--color-background))' }}
+        >
           {/* First row: Day names and numbers */}
-          <div className="flex border-b border-gray-300 dark:border-gray-600">
+          <div
+            className="flex border-b"
+            style={{ borderColor: 'var(--color-foreground)', borderOpacity: '0.2' }}
+          >
             {Array.from({ length: 31 }, (_, i) => {
               const dayNum = i + 1;
               const dayData = days.find(d => d.dayOfMonth === dayNum);
@@ -39,20 +45,38 @@ export function TimeGrid({ currentMonth, timeEntries }: TimeGridProps) {
               const dayOfWeek = dayData?.dayOfWeek ?? 0;
               const isWeekendDay = isWeekend(dayOfWeek);
 
+              const getBackgroundColor = () => {
+                if (!isCurrentMonth) return 'var(--color-background)';
+                if (isWeekendDay) return '#fef2f2';
+                if (isToday) return 'var(--color-orange-light, #dbeafe)';
+                // Weekdays get orange background
+                return 'var(--color-orange-primary, var(--color-background))';
+              };
+
+              const getTextColor = () => {
+                if (!isCurrentMonth) return 'var(--color-foreground)';
+                if (isWeekendDay) return '#dc2626';
+                if (isToday) return 'var(--color-orange-primary, #2563eb)';
+                // For weekdays on orange background: use contrast color (white in dark mode, dark in light mode)
+                return 'var(--color-contrast, white)';
+              };
+
+              const getOpacity = () => {
+                if (!isCurrentMonth) return '0.6';
+                return '1';
+              };
+
               return (
                 <div
                   key={dayNum}
-                  className={`
-                    w-10 h-12 flex flex-col items-center justify-center text-xs font-medium border-r border-gray-300 dark:border-gray-600
-                    ${!isCurrentMonth
-                      ? 'bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-600'
-                      : isWeekendDay
-                        ? 'bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400'
-                        : isToday
-                          ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
-                          : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-                    }
-                  `}
+                  className="w-10 h-12 flex flex-col items-center justify-center text-xs font-medium border-r"
+                  style={{
+                    backgroundColor: getBackgroundColor(),
+                    color: getTextColor(),
+                    opacity: getOpacity(),
+                    borderColor: 'var(--color-foreground)',
+                    borderOpacity: '0.2'
+                  }}
                 >
                   {dayNum <= days.length && (
                     <>
@@ -81,18 +105,34 @@ export function TimeGrid({ currentMonth, timeEntries }: TimeGridProps) {
               const date = dayData?.date;
               const totalMinutes = date ? getTotalMinutesForDay(date) : 0;
 
+              const getTotalsBackgroundColor = () => {
+                if (!isCurrentMonth) return 'var(--color-background)';
+                if (isWeekendDay) return '#fef2f2';
+                return 'var(--color-background)';
+              };
+
+              const getTotalsTextColor = () => {
+                if (!isCurrentMonth) return 'var(--color-foreground)';
+                if (isWeekendDay) return '#dc2626';
+                return 'var(--color-foreground)';
+              };
+
+              const getTotalsOpacity = () => {
+                if (!isCurrentMonth) return '0.6';
+                return '0.8';
+              };
+
               return (
                 <div
                   key={`total-${dayNum}`}
-                  className={`
-                    w-10 h-6 flex items-center justify-center text-xs border-r border-gray-300 dark:border-gray-600
-                    ${!isCurrentMonth
-                      ? 'bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-600'
-                      : isWeekendDay
-                        ? 'bg-red-50 dark:bg-red-950 text-red-400 dark:text-red-500'
-                        : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
-                    }
-                  `}
+                  className="w-10 h-6 flex items-center justify-center text-xs border-r"
+                  style={{
+                    backgroundColor: getTotalsBackgroundColor(),
+                    color: getTotalsTextColor(),
+                    opacity: getTotalsOpacity(),
+                    borderColor: 'var(--color-foreground)',
+                    borderOpacity: '0.2'
+                  }}
                 >
                   {dayNum <= days.length && totalMinutes > 0 && totalMinutes}
                 </div>

@@ -35,7 +35,7 @@ export function getVisibleTasks(tasks: Record<string, Task>): Task[] {
 export function getTaskTotalHours(taskId: string, timeEntries: Record<string, TimeEntry>): number {
   return Object.values(timeEntries)
     .filter((entry: TimeEntry) => entry.taskId === taskId)
-    .reduce((total: number, entry: TimeEntry) => total + (entry.hours || 0), 0);
+    .reduce((total: number, entry: TimeEntry) => total + (entry.minutes || 0) / 60, 0);
 }
 
 /**

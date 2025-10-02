@@ -57,6 +57,8 @@ export function TimeTrackerApp() {
       <div className="flex flex-1 overflow-hidden">
         <TaskSidebar
           tasks={state.tasks}
+          timeEntries={state.timeEntries}
+          currentMonth={state.currentMonth}
           onTaskToggle={toggleTask}
           onTaskAdd={handleTaskAdd}
           onTaskEdit={handleTaskEdit}

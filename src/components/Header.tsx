@@ -2,6 +2,8 @@
 
 import { formatMonth, getNextMonth, getPreviousMonth } from '@/utils/dateHelpers';
 import { ThemeToggle } from './ThemeToggle';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface HeaderProps {
   currentMonth: string;
@@ -23,8 +25,7 @@ export function Header({ currentMonth, onMonthChange, userName = 'User' }: Heade
       className="flex items-center justify-between p-4 border-b transition-colors"
       style={{
         backgroundColor: 'var(--color-background-secondary, var(--color-background))',
-        borderColor: 'var(--color-foreground)',
-        borderOpacity: '0.1'
+        borderColor: 'var(--color-foreground)'
       }}
     >
       <div className="flex items-center gap-4">
@@ -41,50 +42,39 @@ export function Header({ currentMonth, onMonthChange, userName = 'User' }: Heade
       </div>
 
       <div className="flex items-center gap-4">
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handlePreviousMonth}
-          className="p-2 rounded-md transition-colors hover:brightness-110"
-          style={{ backgroundColor: 'transparent' }}
+          className="hover:bg-gray-100 dark:hover:bg-gray-800"
           aria-label="Previous month"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--color-foreground)' }}>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
 
         <h1 className="text-xl font-semibold min-w-[150px] text-center" style={{ color: 'var(--color-foreground)' }}>
           {formatMonth(currentMonth)}
         </h1>
 
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handleNextMonth}
-          className="p-2 rounded-md transition-colors hover:brightness-110"
-          style={{ backgroundColor: 'transparent' }}
+          className="hover:bg-gray-100 dark:hover:bg-gray-800"
           aria-label="Next month"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--color-foreground)' }}>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
+          <ChevronRight className="w-5 h-5" />
+        </Button>
       </div>
 
       <div className="flex items-center gap-2">
         <ThemeToggle />
-        <button
-          className="px-3 py-1 text-sm rounded-md transition-colors"
-          style={{
-            backgroundColor: 'var(--color-orange-primary, #3b82f6)',
-            color: 'white'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--color-orange-hover, #2563eb)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--color-orange-primary, #3b82f6)';
-          }}
+        <Button
+          className="bg-orange-500 hover:bg-orange-600 text-white"
+          size="sm"
         >
           Profile
-        </button>
+        </Button>
       </div>
     </div>
   );

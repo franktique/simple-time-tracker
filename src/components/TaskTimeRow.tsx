@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { Task, TimeEntry, ActiveTimer } from '@/types';
-import { getDaysInMonth } from '@/utils/dateHelpers';
-import { TimeCell } from './TimeCell';
+import { Task, TimeEntry, ActiveTimer } from "@/types";
+import { getDaysInMonth } from "@/utils/dateHelpers";
+import { TimeCell } from "./TimeCell";
 
 interface TaskTimeRowProps {
   task: Task;
@@ -25,7 +25,7 @@ export function TaskTimeRow({
   onUpdateTime,
   onStartTimer,
   onStopTimer,
-  onTaskHover
+  onTaskHover,
 }: TaskTimeRowProps) {
   const days = getDaysInMonth(currentMonth);
 
@@ -33,25 +33,23 @@ export function TaskTimeRow({
 
   return (
     <div
-      className="flex border-b"
-      style={{ borderColor: 'var(--color-foreground)', borderOpacity: '0.2' }}
+      className="flex h-8"
       onMouseEnter={() => onTaskHover(task.id)}
       onMouseLeave={() => onTaskHover(null)}
     >
       {Array.from({ length: 31 }, (_, i) => {
         const dayNum = i + 1;
-        const dayData = days.find(d => d.dayOfMonth === dayNum);
+        const dayData = days.find((d) => d.dayOfMonth === dayNum);
 
         if (!dayData) {
           return (
             <div
               key={dayNum}
-              className="w-10 h-8 border-r"
+              className="w-10 h-8 border-r border-b"
               style={{
-                backgroundColor: 'var(--color-background)',
-                opacity: '0.4',
-                borderColor: 'var(--color-foreground)',
-                borderOpacity: '0.2'
+                backgroundColor: "var(--color-background)",
+                opacity: "0.4",
+                borderColor: "var(--color-foreground)",
               }}
             />
           );
@@ -63,25 +61,24 @@ export function TaskTimeRow({
         const activeTimer = activeTimers[task.id];
 
         const getCellBackgroundColor = () => {
-          if (!dayData.isCurrentMonth) return 'var(--color-background)';
-          if (isWeekendDay) return '#fef2f2';
-          return 'var(--color-background)';
+          if (!dayData.isCurrentMonth) return "var(--color-background)";
+          if (isWeekendDay) return "#fef2f2";
+          return "var(--color-background)";
         };
 
         const getCellOpacity = () => {
-          if (!dayData.isCurrentMonth) return '0.6';
-          return '1';
+          if (!dayData.isCurrentMonth) return "0.6";
+          return "1";
         };
 
         return (
           <div
             key={dayNum}
-            className="w-10 h-8 border-r"
+            className="w-10 h-8 border-r border-b"
             style={{
               backgroundColor: getCellBackgroundColor(),
               opacity: getCellOpacity(),
-              borderColor: 'var(--color-foreground)',
-              borderOpacity: '0.2'
+              borderColor: "var(--color-foreground)",
             }}
           >
             <TimeCell

@@ -35,7 +35,7 @@ export function TimeGrid({ currentMonth, timeEntries }: TimeGridProps) {
           {/* First row: Day names and numbers */}
           <div
             className="flex border-b"
-            style={{ borderColor: 'var(--color-foreground)', borderOpacity: '0.2' }}
+            style={{ borderColor: 'var(--color-foreground)' }}
           >
             {Array.from({ length: 31 }, (_, i) => {
               const dayNum = i + 1;
@@ -74,8 +74,7 @@ export function TimeGrid({ currentMonth, timeEntries }: TimeGridProps) {
                     backgroundColor: getBackgroundColor(),
                     color: getTextColor(),
                     opacity: getOpacity(),
-                    borderColor: 'var(--color-foreground)',
-                    borderOpacity: '0.2'
+                    borderColor: 'var(--color-foreground)'
                   }}
                 >
                   {dayNum <= days.length && (
@@ -130,8 +129,7 @@ export function TimeGrid({ currentMonth, timeEntries }: TimeGridProps) {
                     backgroundColor: getTotalsBackgroundColor(),
                     color: getTotalsTextColor(),
                     opacity: getTotalsOpacity(),
-                    borderColor: 'var(--color-foreground)',
-                    borderOpacity: '0.2'
+                    borderColor: 'var(--color-foreground)'
                   }}
                 >
                   {dayNum <= days.length && totalMinutes > 0 && totalMinutes}

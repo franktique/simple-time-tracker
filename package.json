@@ -11,6 +11,7 @@
     "db:migrate": "tsx scripts/run-migrations.ts"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-slot": "^1.2.3",
     "@types/pg": "^8.15.5",
     "class-variance-authority": "^0.7.1",

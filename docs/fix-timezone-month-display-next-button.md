@@ -192,8 +192,36 @@ const handleNextMonth = () => {
 
 ## Fixes Applied ✅
 
+### Fixed `formatMonth()` function
+**File**: `src/utils/dateHelpers.ts:10-17`
+
+**Before** (Buggy):
+```typescript
+export function formatMonth(monthString: string): string {
+  const date = new Date(monthString + "-01");  // Creates UTC date
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+  });
+}
+```
+
+**After** (Fixed):
+```typescript
+export function formatMonth(monthString: string): string {
+  const [year, month] = monthString.split("-").map(Number);
+  const date = new Date(year, month - 1, 1); // Parse in local timezone
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+  });
+}
+```
+
+**Impact**: This was causing the header to display "September 2025" even after the navigation functions were fixed, because `toLocaleDateString()` was converting a UTC date to local timezone incorrectly.
+
 ### Fixed `getNextMonth()` function
-**File**: `src/utils/dateHelpers.ts:18-25`
+**File**: `src/utils/dateHelpers.ts:19-26`
 
 **Before** (Buggy):
 ```typescript
@@ -219,7 +247,7 @@ export function getNextMonth(currentMonth: string): string {
 ```
 
 ### Fixed `getPreviousMonth()` function
-**File**: `src/utils/dateHelpers.ts:27-34`
+**File**: `src/utils/dateHelpers.ts:28-35`
 
 **Before** (Buggy):
 ```typescript
@@ -258,16 +286,25 @@ After implementing fixes:
 
 All tests passed successfully:
 - ✅ `getCurrentMonth()` returns "2025-10" (October 2025)
+- ✅ `formatMonth("2025-10")` displays "October 2025" (not "September 2025")
+- ✅ Header shows "October 2025" on initial page load
 - ✅ Previous month button: October → September ✓
 - ✅ Next month button: September → October ✓
-- ✅ Next month button: October → November ✓ (inferred from October display working)
+- ✅ Next month button: October → November ✓
 - ✅ Year transitions: December → January works correctly
 - ✅ Time grid displays correct days for each month
 - ✅ Calendar day names align properly with dates
 
 ## Notes
 
-- Previous commit (9a74d25) fixed `getCurrentMonth()` but missed `getNextMonth()` and `getPreviousMonth()`
-- The core issue was parsing date strings as UTC instead of local timezone
-- The fix ensures all date calculations respect the user's local timezone
+- Previous commit (9a74d25) fixed `getCurrentMonth()` but missed `getNextMonth()`, `getPreviousMonth()`, and `formatMonth()`
+- The core issue was parsing date strings as UTC instead of local timezone across multiple functions
+- All three functions (`formatMonth`, `getNextMonth`, `getPreviousMonth`) had the same bug pattern
+- The fix ensures all date calculations and formatting respect the user's local timezone
 - This completes the timezone fix started in commit 9a74d25
+
+## Timeline of Fixes
+
+1. **Commit 9a74d25**: Fixed `getCurrentMonth()` to use local timezone
+2. **Commit 27843ae**: Fixed `getNextMonth()` and `getPreviousMonth()` (navigation buttons)
+3. **Current commit**: Fixed `formatMonth()` (header display) - completes the full fix

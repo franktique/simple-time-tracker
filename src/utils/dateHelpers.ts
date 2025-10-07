@@ -1,7 +1,10 @@
 import { CalendarDay } from '@/types';
 
 export function getCurrentMonth(): string {
-  return new Date().toISOString().slice(0, 7);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
 }
 
 export function formatMonth(monthString: string): string {
@@ -15,13 +18,17 @@ export function formatMonth(monthString: string): string {
 export function getNextMonth(currentMonth: string): string {
   const date = new Date(currentMonth + '-01');
   date.setMonth(date.getMonth() + 1);
-  return date.toISOString().slice(0, 7);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
 }
 
 export function getPreviousMonth(currentMonth: string): string {
   const date = new Date(currentMonth + '-01');
   date.setMonth(date.getMonth() - 1);
-  return date.toISOString().slice(0, 7);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
 }
 
 export function getDaysInMonth(monthString: string): CalendarDay[] {
@@ -30,13 +37,14 @@ export function getDaysInMonth(monthString: string): CalendarDay[] {
 
   const lastDay = new Date(year, month + 1, 0);
   const today = new Date();
+  const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
   const days: CalendarDay[] = [];
 
   for (let day = 1; day <= lastDay.getDate(); day++) {
     const date = new Date(year, month, day);
-    const dateString = date.toISOString().slice(0, 10);
-    const isToday = dateString === today.toISOString().slice(0, 10);
+    const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const isToday = dateString === todayString;
 
     days.push({
       date: dateString,

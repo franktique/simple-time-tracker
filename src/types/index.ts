@@ -5,6 +5,7 @@ export interface Task {
   children: string[];
   trackingType: 'manual' | 'automatic';
   isExpanded: boolean;
+  isCompleted: boolean;
   order: number;
 }
 

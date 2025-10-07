@@ -45,6 +45,7 @@ export function useTimeTracker() {
       children: [],
       trackingType: state.userPreferences.defaultTrackingType,
       isExpanded: false,
+      isCompleted: false,
       order: Object.keys(state.tasks).length
     };
 
@@ -126,6 +127,10 @@ export function useTimeTracker() {
 
   const toggleTask = useCallback((taskId: string) => {
     updateTask(taskId, { isExpanded: !state.tasks[taskId]?.isExpanded });
+  }, [state.tasks, updateTask]);
+
+  const toggleTaskComplete = useCallback((taskId: string) => {
+    updateTask(taskId, { isCompleted: !state.tasks[taskId]?.isCompleted });
   }, [state.tasks, updateTask]);
 
   // Time entry functions
@@ -249,6 +254,7 @@ export function useTimeTracker() {
     updateTask,
     deleteTask,
     toggleTask,
+    toggleTaskComplete,
     updateTimeEntry,
     startTimer,
     stopTimer,

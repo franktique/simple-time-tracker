@@ -5,7 +5,8 @@ import { Task, TimeEntry } from '@/types';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { TaskEditDialog } from '@/components/TaskEditDialog';
-import { ChevronRight, Play, Edit3, Plus, Trash2 } from 'lucide-react';
+import { TaskCompletionDialog } from '@/components/TaskCompletionDialog';
+import { ChevronRight, Play, Edit3, Plus, Trash2, CheckCircle, RotateCcw } from 'lucide-react';
 import { formatTime } from '@/utils/dateHelpers';
 import { hasTaskTimeEntries } from '@/utils/taskHelpers';
 
@@ -19,6 +20,7 @@ interface TaskRowProps {
   onEdit: (taskId: string, updates: { name?: string; trackingType?: 'manual' | 'automatic' }) => void;
   onDelete: (taskId: string) => void;
   onAdd: (parentId: string | null) => void;
+  onToggleComplete: (taskId: string) => void;
   hoveredTaskId: string | null;
 }
 
@@ -32,10 +34,12 @@ export function TaskRow({
   onEdit,
   onDelete,
   onAdd,
+  onToggleComplete,
   hoveredTaskId
 }: TaskRowProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
 
   const hasChildren = task.children.length > 0;
   const childTasks = task.children
@@ -65,6 +69,15 @@ export function TaskRow({
   const handleConfirmDelete = () => {
     onDelete(task.id);
     setShowDeleteDialog(false);
+  };
+
+  const handleComplete = () => {
+    setShowCompletionDialog(true);
+  };
+
+  const handleConfirmComplete = () => {
+    onToggleComplete(task.id);
+    setShowCompletionDialog(false);
   };
 
   const getTrackingIcon = () => {
@@ -146,10 +159,10 @@ export function TaskRow({
           {getTrackingIcon()}
 
           <span
-            className={`flex-1 truncate cursor-pointer transition-colors ${hasChildren ? 'text-sm font-medium uppercase tracking-wide' : 'text-sm'}`}
+            className={`flex-1 truncate cursor-pointer transition-colors ${hasChildren ? 'text-sm font-medium uppercase tracking-wide' : 'text-sm'} ${task.isCompleted ? 'line-through opacity-60' : ''}`}
             style={{
               color: hasChildren ? 'var(--color-orange-primary, var(--color-foreground))' : 'var(--color-foreground)',
-              opacity: hasChildren ? '1' : '0.9'
+              opacity: hasChildren ? '1' : (task.isCompleted ? '0.6' : '0.9')
             }}
             onClick={handleEdit}
           >
@@ -181,6 +194,31 @@ export function TaskRow({
             <Plus className="w-3 h-3" />
           </Button>
 
+          {/* Show completion button for leaf tasks */}
+          {!hasChildren && (
+            task.isCompleted ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleComplete}
+                className="w-5 h-5 p-0 hover:bg-orange-100 hover:text-orange-600"
+                title="Mark as incomplete"
+              >
+                <RotateCcw className="w-3 h-3" />
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleComplete}
+                className="w-5 h-5 p-0 hover:bg-green-100 hover:text-green-600"
+                title="Mark as completed"
+              >
+                <CheckCircle className="w-3 h-3" />
+              </Button>
+            )
+          )}
+
           {/* Only show delete button for tasks without children */}
           {!hasChildren && (
             <Button
@@ -209,6 +247,7 @@ export function TaskRow({
           onEdit={onEdit}
           onDelete={onDelete}
           onAdd={onAdd}
+          onToggleComplete={onToggleComplete}
           hoveredTaskId={hoveredTaskId}
         />
       ))}
@@ -232,6 +271,14 @@ export function TaskRow({
         onConfirm={handleConfirmDelete}
         onCancel={() => setShowDeleteDialog(false)}
         variant="destructive"
+      />
+
+      {/* Task completion dialog */}
+      <TaskCompletionDialog
+        isOpen={showCompletionDialog}
+        task={task}
+        onClose={() => setShowCompletionDialog(false)}
+        onConfirm={handleConfirmComplete}
       />
     </div>
   );

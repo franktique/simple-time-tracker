@@ -13,6 +13,7 @@ interface TaskSidebarProps {
   onTaskAdd: (parentId: string | null) => void;
   onTaskEdit: (taskId: string, updates: { name?: string; trackingType?: 'manual' | 'automatic' }) => void;
   onTaskDelete: (taskId: string) => void;
+  onTaskToggleComplete: (taskId: string) => void;
   hoveredTaskId: string | null;
 }
 
@@ -24,6 +25,7 @@ export function TaskSidebar({
   onTaskAdd,
   onTaskEdit,
   onTaskDelete,
+  onTaskToggleComplete,
   hoveredTaskId,
 }: TaskSidebarProps) {
   const rootTasks = Object.values(tasks)
@@ -116,6 +118,7 @@ export function TaskSidebar({
               onEdit={onTaskEdit}
               onDelete={onTaskDelete}
               onAdd={onTaskAdd}
+              onToggleComplete={onTaskToggleComplete}
               hoveredTaskId={hoveredTaskId}
             />
           ))}

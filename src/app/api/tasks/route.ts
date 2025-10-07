@@ -27,6 +27,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Ensure isCompleted is set to false by default if not provided
+    if (task.isCompleted === undefined) {
+      task.isCompleted = false;
+    }
+
     const createdTask = await createTask(task);
     return NextResponse.json(createdTask, { status: 201 });
   } catch (error) {

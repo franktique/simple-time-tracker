@@ -16,6 +16,7 @@ export function TimeTrackerApp() {
     updateTask,
     deleteTask,
     toggleTask,
+    toggleTaskComplete,
     updateTimeEntry,
     startTimer,
     stopTimer,
@@ -40,6 +41,10 @@ export function TimeTrackerApp() {
 
   const handleTaskEdit = (taskId: string, updates: { name?: string; trackingType?: 'manual' | 'automatic' }) => {
     updateTask(taskId, updates);
+  };
+
+  const handleTaskToggleComplete = (taskId: string) => {
+    toggleTaskComplete(taskId);
   };
 
   if (state.isLoading) {
@@ -70,6 +75,7 @@ export function TimeTrackerApp() {
           onTaskAdd={handleTaskAdd}
           onTaskEdit={handleTaskEdit}
           onTaskDelete={deleteTask}
+          onTaskToggleComplete={handleTaskToggleComplete}
           hoveredTaskId={hoveredTaskId}
         />
 

@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { Task, TimeEntry } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
-import { TrackingTypeSelector } from '@/components/TrackingTypeSelector';
+import { TaskEditDialog } from '@/components/TaskEditDialog';
 import { ChevronRight, Play, Edit3, Plus, Trash2 } from 'lucide-react';
 import { formatTime } from '@/utils/dateHelpers';
+import { hasTaskTimeEntries } from '@/utils/taskHelpers';
 
 interface TaskRowProps {
   task: Task;
@@ -34,9 +34,7 @@ export function TaskRow({
   onAdd,
   hoveredTaskId
 }: TaskRowProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState(task.name);
-  const [editTrackingType, setEditTrackingType] = useState<'manual' | 'automatic'>(task.trackingType);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const hasChildren = task.children.length > 0;
@@ -52,35 +50,12 @@ export function TaskRow({
   };
 
   const handleEdit = () => {
-    if (isEditing) {
-      const updates: { name?: string; trackingType?: 'manual' | 'automatic' } = {};
-
-      if (editName.trim() && editName.trim() !== task.name) {
-        updates.name = editName.trim();
-      }
-
-      if (editTrackingType !== task.trackingType) {
-        updates.trackingType = editTrackingType;
-      }
-
-      if (Object.keys(updates).length > 0) {
-        onEdit(task.id, updates);
-      }
-
-      setIsEditing(false);
-    } else {
-      setIsEditing(true);
-    }
+    setShowEditDialog(true);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleEdit();
-    } else if (e.key === 'Escape') {
-      setEditName(task.name);
-      setEditTrackingType(task.trackingType);
-      setIsEditing(false);
-    }
+  const handleEditConfirm = (updates: { name?: string; trackingType?: 'manual' | 'automatic' }) => {
+    onEdit(task.id, updates);
+    setShowEditDialog(false);
   };
 
   const handleDelete = () => {
@@ -168,38 +143,18 @@ export function TaskRow({
 
         {/* Task name */}
         <div className="flex-1 flex items-center gap-2 min-w-0">
-          {!isEditing && getTrackingIcon()}
+          {getTrackingIcon()}
 
-          {isEditing ? (
-            <div className="flex-1 flex flex-col gap-2">
-              <Input
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                onBlur={handleEdit}
-                onKeyDown={handleKeyDown}
-                className="h-7 text-sm"
-                autoFocus
-              />
-              {!hasChildren && (
-                <TrackingTypeSelector
-                  value={editTrackingType}
-                  onChange={setEditTrackingType}
-                />
-              )}
-            </div>
-          ) : (
-            <span
-              className={`flex-1 truncate cursor-pointer transition-colors ${hasChildren ? 'text-sm font-medium uppercase tracking-wide' : 'text-sm'}`}
-              style={{
-                color: hasChildren ? 'var(--color-orange-primary, var(--color-foreground))' : 'var(--color-foreground)',
-                opacity: hasChildren ? '1' : '0.9'
-              }}
-              onClick={handleEdit}
-            >
-              {task.name}
-            </span>
-          )}
+          <span
+            className={`flex-1 truncate cursor-pointer transition-colors ${hasChildren ? 'text-sm font-medium uppercase tracking-wide' : 'text-sm'}`}
+            style={{
+              color: hasChildren ? 'var(--color-orange-primary, var(--color-foreground))' : 'var(--color-foreground)',
+              opacity: hasChildren ? '1' : '0.9'
+            }}
+            onClick={handleEdit}
+          >
+            {task.name}
+          </span>
         </div>
 
         {/* Total hours */}
@@ -257,6 +212,15 @@ export function TaskRow({
           hoveredTaskId={hoveredTaskId}
         />
       ))}
+
+      {/* Edit dialog */}
+      <TaskEditDialog
+        isOpen={showEditDialog}
+        onClose={() => setShowEditDialog(false)}
+        onConfirm={handleEditConfirm}
+        task={task}
+        hasTimeEntries={hasTaskTimeEntries(task.id, timeEntries)}
+      />
 
       {/* Delete confirmation dialog */}
       <ConfirmDialog

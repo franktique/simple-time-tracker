@@ -28,19 +28,23 @@ export function TimeCell({
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [displayTime, setDisplayTime] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isLeafTask = task.children.length === 0;
-  const hasTimer = activeTimer !== undefined;
+  // Timer is active for THIS cell only if the activeTimer's date matches this cell's date
+  const hasTimer = activeTimer !== undefined && activeTimer.date === date;
   const minutes = timeEntry?.minutes || 0;
 
   // Update display time for active timers
   useEffect(() => {
-    if (!activeTimer) {
+    // For cells without an active timer, just show the stored minutes
+    if (!hasTimer) {
       setDisplayTime(minutes);
       return;
     }
 
+    // This cell has the active timer - update every second
     const interval = setInterval(() => {
       const elapsed = activeTimer.elapsedTime + (Date.now() - activeTimer.startTime);
       const timerMinutes = elapsed / (60 * 1000);
@@ -48,7 +52,7 @@ export function TimeCell({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [activeTimer, minutes]);
+  }, [hasTimer, activeTimer, minutes]);
 
   // Focus input when editing starts
   useEffect(() => {
@@ -92,9 +96,13 @@ export function TimeCell({
   };
 
   const formatDisplayValue = () => {
-    if (hasTimer) {
+    // For automatic tracking tasks, always show time in MM:SS format
+    if (task.trackingType === 'automatic') {
+      if (displayTime === 0) return '';
       return formatTime(displayTime * 60 * 1000);
     }
+
+    // For manual tracking tasks, show decimal hours
     if (displayTime === 0) return '';
     if (displayTime === Math.floor(displayTime)) {
       return displayTime.toString();
@@ -119,11 +127,13 @@ export function TimeCell({
         backgroundColor: hasTimer ? 'var(--color-orange-light, #dbeafe)' : 'transparent'
       }}
       onMouseEnter={(e) => {
+        setIsHovered(true);
         if (task.trackingType === 'manual' && !hasTimer) {
           e.currentTarget.style.backgroundColor = 'var(--color-orange-light, rgba(0,0,0,0.05))';
         }
       }}
       onMouseLeave={(e) => {
+        setIsHovered(false);
         if (task.trackingType === 'manual' && !hasTimer) {
           e.currentTarget.style.backgroundColor = 'transparent';
         }
@@ -148,22 +158,23 @@ export function TimeCell({
         />
       ) : (
         <>
-          {task.trackingType === 'automatic' && (
+          {/* Show timer button only for automatic tracking tasks */}
+          {task.trackingType === 'automatic' && (isHovered || hasTimer) && (
             <button
               onClick={handleTimerToggle}
-              className="absolute inset-0 flex items-center justify-center"
+              className="absolute inset-0 flex items-center justify-center transition-all hover:bg-orange-50 hover:bg-opacity-30"
               style={{
                 color: hasTimer ? 'var(--color-orange-primary, #2563eb)' : 'var(--color-foreground)',
-                opacity: hasTimer ? '1' : '0.6'
+                opacity: hasTimer ? '1' : '0.7'
               }}
               title={hasTimer ? 'Stop timer' : 'Start timer'}
             >
               {hasTimer ? (
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
               ) : (
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-6 h-6 hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                 </svg>
               )}
@@ -172,10 +183,12 @@ export function TimeCell({
 
           {/* Display time value */}
           <span
-            className={`${task.trackingType === 'automatic' ? 'absolute bottom-0 right-0 px-1 text-xs' : ''} ${hasTimer ? 'font-medium' : ''}`}
+            className={`${task.trackingType === 'automatic' ? 'absolute bottom-0.5 right-0.5 px-1 text-xs pointer-events-none rounded' : ''} ${hasTimer ? 'font-medium' : ''}`}
             style={{
               color: hasTimer ? 'var(--color-orange-primary, #2563eb)' : 'var(--color-foreground)',
-              opacity: hasTimer ? '1' : '0.9'
+              opacity: hasTimer ? '1' : '0.9',
+              backgroundColor: hasTimer && task.trackingType === 'automatic' ? 'white' : 'transparent',
+              zIndex: 10
             }}
           >
             {formatDisplayValue()}

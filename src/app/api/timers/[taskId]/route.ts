@@ -35,8 +35,16 @@ export async function PATCH(
     const { taskId } = await params;
     const updates: Partial<ActiveTimer> = await request.json();
 
+    if (!updates.date) {
+      return NextResponse.json(
+        { error: 'Date is required' },
+        { status: 400 }
+      );
+    }
+
     const timer: ActiveTimer = {
       taskId,
+      date: updates.date,
       startTime: updates.startTime || Date.now(),
       elapsedTime: updates.elapsedTime || 0,
     };

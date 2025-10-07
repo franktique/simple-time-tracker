@@ -7,6 +7,7 @@ export interface DbTask {
   parent_id: string | null;
   tracking_type: 'manual' | 'automatic';
   is_expanded: boolean;
+  is_completed: boolean;
   order: number;
   created_at: Date;
   updated_at: Date;
@@ -20,6 +21,7 @@ function dbTaskToTask(dbTask: DbTask, children: string[]): Task {
     children,
     trackingType: dbTask.tracking_type,
     isExpanded: dbTask.is_expanded,
+    isCompleted: dbTask.is_completed,
     order: dbTask.order,
   };
 }
@@ -65,9 +67,9 @@ export async function getTaskById(id: string): Promise<Task | null> {
 export async function createTask(task: Task): Promise<Task> {
   await transaction(async (client) => {
     await client.query(
-      `INSERT INTO tasks (id, name, parent_id, tracking_type, is_expanded, "order")
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [task.id, task.name, task.parentId, task.trackingType, task.isExpanded, task.order]
+      `INSERT INTO tasks (id, name, parent_id, tracking_type, is_expanded, is_completed, "order")
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [task.id, task.name, task.parentId, task.trackingType, task.isExpanded, task.isCompleted, task.order]
     );
   });
 
@@ -94,6 +96,10 @@ export async function updateTask(id: string, updates: Partial<Task>): Promise<Ta
   if (updates.isExpanded !== undefined) {
     fields.push(`is_expanded = $${paramIndex++}`);
     values.push(updates.isExpanded);
+  }
+  if (updates.isCompleted !== undefined) {
+    fields.push(`is_completed = $${paramIndex++}`);
+    values.push(updates.isCompleted);
   }
   if (updates.order !== undefined) {
     fields.push(`"order" = $${paramIndex++}`);

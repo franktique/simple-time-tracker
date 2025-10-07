@@ -54,10 +54,20 @@ export class StorageManager {
 
   static loadTasks(): Record<string, Task> {
     const tasks = this.loadData(STORAGE_KEYS.TASKS, {});
+
     // If no tasks exist, create sample hierarchical data
     if (Object.keys(tasks).length === 0) {
       return this.createSampleTasks();
     }
+
+    // Migrate existing tasks to include isCompleted field
+    Object.keys(tasks).forEach(taskId => {
+      const task = tasks[taskId];
+      if (task.isCompleted === undefined) {
+        task.isCompleted = false;
+      }
+    });
+
     return tasks;
   }
 
@@ -72,6 +82,7 @@ export class StorageManager {
       children: ['planning-1'],
       trackingType: 'manual',
       isExpanded: false,
+      isCompleted: false,
       order: 0
     };
     tasks[adminTask.id] = adminTask;
@@ -84,6 +95,7 @@ export class StorageManager {
       children: [],
       trackingType: 'manual',
       isExpanded: false,
+      isCompleted: false,
       order: 0
     };
     tasks[planningTask.id] = planningTask;

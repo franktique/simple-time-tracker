@@ -16,19 +16,21 @@ export function formatMonth(monthString: string): string {
 }
 
 export function getNextMonth(currentMonth: string): string {
-  const date = new Date(currentMonth + '-01');
+  const [year, month] = currentMonth.split('-').map(Number);
+  const date = new Date(year, month - 1, 1); // Parse in local timezone
   date.setMonth(date.getMonth() + 1);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  return `${year}-${month}`;
+  const newYear = date.getFullYear();
+  const newMonth = String(date.getMonth() + 1).padStart(2, '0');
+  return `${newYear}-${newMonth}`;
 }
 
 export function getPreviousMonth(currentMonth: string): string {
-  const date = new Date(currentMonth + '-01');
+  const [year, month] = currentMonth.split('-').map(Number);
+  const date = new Date(year, month - 1, 1); // Parse in local timezone
   date.setMonth(date.getMonth() - 1);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  return `${year}-${month}`;
+  const newYear = date.getFullYear();
+  const newMonth = String(date.getMonth() + 1).padStart(2, '0');
+  return `${newYear}-${newMonth}`;
 }
 
 export function getDaysInMonth(monthString: string): CalendarDay[] {

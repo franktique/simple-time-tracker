@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Migrate LocalStorage to Database</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 4px;
+    }
+    .success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Migrate LocalStorage to PostgreSQL</h1>
+    <p>This tool will migrate your existing time tracking data from localStorage to the PostgreSQL database.</p>
+
+    <div id="status"></div>
+
+    <button id="checkButton" onclick="checkLocalStorage()">Check LocalStorage Data</button>
+    <button id="migrateButton" onclick="migrateData()" disabled>Migrate to Database</button>
+    <button id="clearButton" onclick="clearLocalStorage()" disabled>Clear LocalStorage (After Migration)</button>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const STORAGE_KEYS = {
+      TASKS: 'timetracker-tasks',
+      TIME_ENTRIES: 'timetracker-entries',
+      ACTIVE_TIMERS: 'timetracker-timers',
+      PREFERENCES: 'timetracker-preferences'
+    };
+
+    let migrationData = null;
+
+    function showResult(message, type = 'info') {
+      const resultDiv = document.getElementById('result');
+      resultDiv.className = `result ${type}`;
+      resultDiv.innerHTML = message;
+    }
+
+    function checkLocalStorage() {
+      try {
+        const tasks = JSON.parse(localStorage.getItem(STORAGE_KEYS.TASKS) || '{}');
+        const timeEntries = JSON.parse(localStorage.getItem(STORAGE_KEYS.TIME_ENTRIES) || '{}');
+        const activeTimers = JSON.parse(localStorage.getItem(STORAGE_KEYS.ACTIVE_TIMERS) || '{}');
+        const preferences = JSON.parse(localStorage.getItem(STORAGE_KEYS.PREFERENCES) || '{"theme":"system","defaultTrackingType":"manual","timeFormat":"24h"}');
+
+        const taskCount = Object.keys(tasks).length;
+        const entryCount = Object.keys(timeEntries).length;
+        const timerCount = Object.keys(activeTimers).length;
+
+        if (taskCount === 0 && entryCount === 0 && timerCount === 0) {
+          showResult('<strong>No data found in localStorage.</strong><br>Nothing to migrate.', 'info');
+          return;
+        }
+
+        migrationData = {
+          tasks,
+          timeEntries,
+          activeTimers,
+          preferences
+        };
+
+        showResult(`
+          <strong>LocalStorage Data Found:</strong><br>
+          • Tasks: ${taskCount}<br>
+          • Time Entries: ${entryCount}<br>
+          • Active Timers: ${timerCount}<br>
+          • Preferences: Yes<br><br>
+          <strong>Ready to migrate!</strong> Click "Migrate to Database" to proceed.
+        `, 'success');
+
+        document.getElementById('migrateButton').disabled = false;
+      } catch (error) {
+        showResult(`<strong>Error checking localStorage:</strong><br>${error.message}`, 'error');
+      }
+    }
+
+    async function migrateData() {
+      if (!migrationData) {
+        showResult('No data to migrate. Click "Check LocalStorage Data" first.', 'error');
+        return;
+      }
+
+      try {
+        document.getElementById('migrateButton').disabled = true;
+        document.getElementById('migrateButton').textContent = 'Migrating...';
+
+        const response = await fetch('/api/migrate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(migrationData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          showResult(`
+            <strong>Migration Successful!</strong><br><br>
+            Migrated:<br>
+            • Tasks: ${result.migrated.tasks}<br>
+            • Time Entries: ${result.migrated.timeEntries}<br>
+            • Active Timers: ${result.migrated.activeTimers}<br>
+            • Preferences: ${result.migrated.preferences ? 'Yes' : 'No'}<br><br>
+            <strong>Next step:</strong> Click "Clear LocalStorage" to remove the old data, then refresh the page.
+          `, 'success');
+          document.getElementById('clearButton').disabled = false;
+        } else {
+          throw new Error(result.error || 'Migration failed');
+        }
+      } catch (error) {
+        showResult(`<strong>Migration Failed:</strong><br>${error.message}`, 'error');
+        document.getElementById('migrateButton').disabled = false;
+        document.getElementById('migrateButton').textContent = 'Migrate to Database';
+      }
+    }
+
+    function clearLocalStorage() {
+      if (confirm('Are you sure you want to clear localStorage? Make sure the migration was successful first!')) {
+        Object.values(STORAGE_KEYS).forEach(key => {
+          localStorage.removeItem(key);
+        });
+        showResult('<strong>LocalStorage cleared!</strong><br>You can now close this page and refresh your app.', 'success');
+        document.getElementById('clearButton').disabled = true;
+        document.getElementById('checkButton').disabled = true;
+        document.getElementById('migrateButton').disabled = true;
+      }
+    }
+
+    // Auto-check on load
+    window.addEventListener('load', checkLocalStorage);
+  </script>
+</body>
+</html>

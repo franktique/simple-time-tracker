@@ -54,3 +54,18 @@ export function getTaskLevel(task: Task, tasks: Record<string, Task>): number {
 
   return level;
 }
+
+/**
+ * Checks if a task has any time entries
+ */
+export function hasTaskTimeEntries(taskId: string, timeEntries: Record<string, TimeEntry>): boolean {
+  return Object.values(timeEntries).some(entry => entry.taskId === taskId);
+}
+
+/**
+ * Checks if a task's tracking type can be changed
+ * Returns false if task has children or has time entries
+ */
+export function canChangeTrackingType(task: Task, timeEntries: Record<string, TimeEntry>): boolean {
+  return !task.children.length && !hasTaskTimeEntries(task.id, timeEntries);
+}

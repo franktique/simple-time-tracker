@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Task, TimeEntry, ActiveTimer } from '@/types';
 import { formatTime } from '@/utils/dateHelpers';
+import { ContextMenu } from '@/components/ui/ContextMenu';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 
 interface TimeCellProps {
   task: Task;
@@ -29,6 +31,8 @@ export function TimeCell({
   const [inputValue, setInputValue] = useState('');
   const [displayTime, setDisplayTime] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isLeafTask = task.children.length === 0;
@@ -61,6 +65,13 @@ export function TimeCell({
       inputRef.current.select();
     }
   }, [isEditing]);
+
+  // Cleanup context menu on unmount
+  useEffect(() => {
+    return () => {
+      setContextMenu(null);
+    };
+  }, []);
 
   const handleCellClick = () => {
     if (!isLeafTask) return;
@@ -95,6 +106,24 @@ export function TimeCell({
     }
   };
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    // Only show context menu if there's a time entry to delete
+    if (minutes > 0 && isLeafTask && isCurrentMonth && !hasTimer) {
+      setContextMenu({ x: e.clientX, y: e.clientY });
+    }
+  };
+
+  const handleDeleteEntry = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = () => {
+    onUpdateTime(task.id, date, 0);
+    setShowDeleteConfirm(false);
+  };
+
   const formatDisplayValue = () => {
     // For automatic tracking tasks, always show time in MM:SS format
     if (task.trackingType === 'automatic') {
@@ -121,80 +150,111 @@ export function TimeCell({
   }
 
   return (
-    <div
-      className="h-full w-full flex items-center justify-center text-sm relative group cursor-pointer"
-      style={{
-        backgroundColor: hasTimer ? 'var(--color-orange-light, #dbeafe)' : 'transparent'
-      }}
-      onMouseEnter={(e) => {
-        setIsHovered(true);
-        if (task.trackingType === 'manual' && !hasTimer) {
-          e.currentTarget.style.backgroundColor = 'var(--color-orange-light, rgba(0,0,0,0.05))';
-        }
-      }}
-      onMouseLeave={(e) => {
-        setIsHovered(false);
-        if (task.trackingType === 'manual' && !hasTimer) {
-          e.currentTarget.style.backgroundColor = 'transparent';
-        }
-      }}
-      onClick={handleCellClick}
-    >
-      {isEditing ? (
-        <input
-          ref={inputRef}
-          type="number"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onBlur={handleInputSubmit}
-          onKeyDown={handleInputKeyDown}
-          className="w-full h-full px-1 text-center text-sm border-none outline-none"
-          style={{
-            backgroundColor: 'var(--color-background)',
-            color: 'var(--color-foreground)'
-          }}
-          step="0.1"
-          min="0"
-        />
-      ) : (
-        <>
-          {/* Show timer button only for automatic tracking tasks */}
-          {task.trackingType === 'automatic' && (isHovered || hasTimer) && (
-            <button
-              onClick={handleTimerToggle}
-              className="absolute inset-0 flex items-center justify-center transition-all hover:bg-orange-50 hover:bg-opacity-30"
+    <>
+      <div
+        className="h-full w-full flex items-center justify-center text-sm relative group cursor-pointer"
+        style={{
+          backgroundColor: hasTimer ? 'var(--color-orange-light, #dbeafe)' : 'transparent'
+        }}
+        onMouseEnter={(e) => {
+          setIsHovered(true);
+          if (task.trackingType === 'manual' && !hasTimer) {
+            e.currentTarget.style.backgroundColor = 'var(--color-orange-light, rgba(0,0,0,0.05))';
+          }
+        }}
+        onMouseLeave={(e) => {
+          setIsHovered(false);
+          if (task.trackingType === 'manual' && !hasTimer) {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }
+        }}
+        onClick={handleCellClick}
+        onContextMenu={handleContextMenu}
+      >
+        {isEditing ? (
+          <input
+            ref={inputRef}
+            type="number"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onBlur={handleInputSubmit}
+            onKeyDown={handleInputKeyDown}
+            className="w-full h-full px-1 text-center text-sm border-none outline-none"
+            style={{
+              backgroundColor: 'var(--color-background)',
+              color: 'var(--color-foreground)'
+            }}
+            step="0.1"
+            min="0"
+          />
+        ) : (
+          <>
+            {/* Show timer button only for automatic tracking tasks */}
+            {task.trackingType === 'automatic' && (isHovered || hasTimer) && (
+              <button
+                onClick={handleTimerToggle}
+                className="absolute inset-0 flex items-center justify-center transition-all hover:bg-orange-50 hover:bg-opacity-30"
+                style={{
+                  color: hasTimer ? 'var(--color-orange-primary, #2563eb)' : 'var(--color-foreground)',
+                  opacity: hasTimer ? '1' : '0.7'
+                }}
+                title={hasTimer ? 'Stop timer' : 'Start timer'}
+              >
+                {hasTimer ? (
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6 hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </button>
+            )}
+
+            {/* Display time value */}
+            <span
+              className={`${task.trackingType === 'automatic' ? 'absolute bottom-0.5 right-0.5 px-1 text-xs pointer-events-none rounded' : ''} ${hasTimer ? 'font-medium' : ''}`}
               style={{
                 color: hasTimer ? 'var(--color-orange-primary, #2563eb)' : 'var(--color-foreground)',
-                opacity: hasTimer ? '1' : '0.7'
+                opacity: hasTimer ? '1' : '0.9',
+                backgroundColor: hasTimer && task.trackingType === 'automatic' ? 'white' : 'transparent',
+                zIndex: 10
               }}
-              title={hasTimer ? 'Stop timer' : 'Start timer'}
             >
-              {hasTimer ? (
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-              ) : (
-                <svg className="w-6 h-6 hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                </svg>
-              )}
-            </button>
-          )}
+              {formatDisplayValue()}
+            </span>
+          </>
+        )}
+      </div>
 
-          {/* Display time value */}
-          <span
-            className={`${task.trackingType === 'automatic' ? 'absolute bottom-0.5 right-0.5 px-1 text-xs pointer-events-none rounded' : ''} ${hasTimer ? 'font-medium' : ''}`}
-            style={{
-              color: hasTimer ? 'var(--color-orange-primary, #2563eb)' : 'var(--color-foreground)',
-              opacity: hasTimer ? '1' : '0.9',
-              backgroundColor: hasTimer && task.trackingType === 'automatic' ? 'white' : 'transparent',
-              zIndex: 10
-            }}
-          >
-            {formatDisplayValue()}
-          </span>
-        </>
+      {/* Context Menu */}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+          items={[
+            {
+              label: 'Delete Entry',
+              onClick: handleDeleteEntry,
+              danger: true
+            }
+          ]}
+        />
       )}
-    </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="Delete Time Entry"
+        message={`Are you sure you want to delete ${formatDisplayValue() || 'this time entry'} for "${task.name}" on ${date}?`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="destructive"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
+    </>
   );
 }

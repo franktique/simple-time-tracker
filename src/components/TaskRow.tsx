@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Task, TimeEntry } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { ChevronRight, Play, Edit3, Plus, Trash2 } from 'lucide-react';
 
 interface TaskRowProps {
@@ -33,6 +34,7 @@ export function TaskRow({
 }: TaskRowProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(task.name);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const hasChildren = task.children.length > 0;
   const childTasks = task.children
@@ -64,6 +66,15 @@ export function TaskRow({
       setEditName(task.name);
       setIsEditing(false);
     }
+  };
+
+  const handleDelete = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = () => {
+    onDelete(task.id);
+    setShowDeleteDialog(false);
   };
 
   const getTrackingIcon = () => {
@@ -180,15 +191,18 @@ export function TaskRow({
             <Plus className="w-3 h-3" />
           </Button>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onDelete(task.id)}
-            className="w-5 h-5 p-0 hover:bg-red-100 hover:text-red-600"
-            title="Delete task"
-          >
-            <Trash2 className="w-3 h-3" />
-          </Button>
+          {/* Only show delete button for tasks without children */}
+          {!hasChildren && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleDelete}
+              className="w-5 h-5 p-0 hover:bg-red-100 hover:text-red-600"
+              title="Delete task"
+            >
+              <Trash2 className="w-3 h-3" />
+            </Button>
+          )}
         </div>
       </div>
 
@@ -208,6 +222,18 @@ export function TaskRow({
           hoveredTaskId={hoveredTaskId}
         />
       ))}
+
+      {/* Delete confirmation dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        title="Delete Task"
+        message={`Are you sure you want to delete "${task.name}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowDeleteDialog(false)}
+        variant="destructive"
+      />
     </div>
   );
 }

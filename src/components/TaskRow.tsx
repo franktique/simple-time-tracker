@@ -5,7 +5,9 @@ import { Task, TimeEntry } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { TrackingTypeSelector } from '@/components/TrackingTypeSelector';
 import { ChevronRight, Play, Edit3, Plus, Trash2 } from 'lucide-react';
+import { formatTime } from '@/utils/dateHelpers';
 
 interface TaskRowProps {
   task: Task;
@@ -14,7 +16,7 @@ interface TaskRowProps {
   currentMonth: string;
   level: number;
   onToggle: (taskId: string) => void;
-  onEdit: (taskId: string, name: string) => void;
+  onEdit: (taskId: string, updates: { name?: string; trackingType?: 'manual' | 'automatic' }) => void;
   onDelete: (taskId: string) => void;
   onAdd: (parentId: string | null) => void;
   hoveredTaskId: string | null;
@@ -34,6 +36,7 @@ export function TaskRow({
 }: TaskRowProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(task.name);
+  const [editTrackingType, setEditTrackingType] = useState<'manual' | 'automatic'>(task.trackingType);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const hasChildren = task.children.length > 0;
@@ -50,9 +53,20 @@ export function TaskRow({
 
   const handleEdit = () => {
     if (isEditing) {
-      if (editName.trim()) {
-        onEdit(task.id, editName.trim());
+      const updates: { name?: string; trackingType?: 'manual' | 'automatic' } = {};
+
+      if (editName.trim() && editName.trim() !== task.name) {
+        updates.name = editName.trim();
       }
+
+      if (editTrackingType !== task.trackingType) {
+        updates.trackingType = editTrackingType;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        onEdit(task.id, updates);
+      }
+
       setIsEditing(false);
     } else {
       setIsEditing(true);
@@ -64,6 +78,7 @@ export function TaskRow({
       handleEdit();
     } else if (e.key === 'Escape') {
       setEditName(task.name);
+      setEditTrackingType(task.trackingType);
       setIsEditing(false);
     }
   };
@@ -79,11 +94,19 @@ export function TaskRow({
 
   const getTrackingIcon = () => {
     if (task.trackingType === 'automatic') {
-      return <Play className="w-3 h-3 text-blue-500" />;
+      return (
+        <div className="flex items-center" title="Automatic tracking - use start/stop timer">
+          <Play className="w-3 h-3 text-blue-500" />
+        </div>
+      );
     } else if (hasChildren) {
       return null;
     } else {
-      return <Edit3 className="w-3 h-3 opacity-50" />;
+      return (
+        <div className="flex items-center" title="Manual tracking - click cells to input time">
+          <Edit3 className="w-3 h-3 text-gray-500" />
+        </div>
+      );
     }
   };
 
@@ -145,18 +168,26 @@ export function TaskRow({
 
         {/* Task name */}
         <div className="flex-1 flex items-center gap-2 min-w-0">
-          {getTrackingIcon()}
+          {!isEditing && getTrackingIcon()}
 
           {isEditing ? (
-            <Input
-              type="text"
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-              onBlur={handleEdit}
-              onKeyDown={handleKeyDown}
-              className="flex-1 h-7 text-sm"
-              autoFocus
-            />
+            <div className="flex-1 flex flex-col gap-2">
+              <Input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                onBlur={handleEdit}
+                onKeyDown={handleKeyDown}
+                className="h-7 text-sm"
+                autoFocus
+              />
+              {!hasChildren && (
+                <TrackingTypeSelector
+                  value={editTrackingType}
+                  onChange={setEditTrackingType}
+                />
+              )}
+            </div>
           ) : (
             <span
               className={`flex-1 truncate cursor-pointer transition-colors ${hasChildren ? 'text-sm font-medium uppercase tracking-wide' : 'text-sm'}`}
@@ -176,7 +207,11 @@ export function TaskRow({
           className="text-xs font-medium min-w-[2rem] text-right"
           style={{ color: 'var(--color-foreground)', opacity: '0.6' }}
         >
-          {!hasChildren && totalMinutes > 0 ? totalMinutes : ''}
+          {!hasChildren && totalMinutes > 0 ? (
+            task.trackingType === 'automatic'
+              ? formatTime(totalMinutes * 60 * 1000)
+              : totalMinutes.toFixed(1)
+          ) : ''}
         </span>
 
         {/* Action buttons */}

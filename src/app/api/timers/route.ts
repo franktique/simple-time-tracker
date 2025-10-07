@@ -20,9 +20,9 @@ export async function POST(request: NextRequest) {
     const timer: ActiveTimer = await request.json();
 
     // Validate required fields
-    if (!timer.taskId || timer.startTime === undefined) {
+    if (!timer.taskId || !timer.date || timer.startTime === undefined) {
       return NextResponse.json(
-        { error: 'Missing required fields: taskId, startTime' },
+        { error: 'Missing required fields: taskId, date, startTime' },
         { status: 400 }
       );
     }

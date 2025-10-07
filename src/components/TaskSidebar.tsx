@@ -11,7 +11,7 @@ interface TaskSidebarProps {
   currentMonth: string;
   onTaskToggle: (taskId: string) => void;
   onTaskAdd: (parentId: string | null) => void;
-  onTaskEdit: (taskId: string, name: string) => void;
+  onTaskEdit: (taskId: string, updates: { name?: string; trackingType?: 'manual' | 'automatic' }) => void;
   onTaskDelete: (taskId: string) => void;
   hoveredTaskId: string | null;
 }

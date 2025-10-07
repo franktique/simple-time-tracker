@@ -3,6 +3,7 @@ import { ActiveTimer } from '@/types';
 
 export interface DbActiveTimer {
   task_id: string;
+  date: string;
   start_time: number;
   elapsed_time: number;
   created_at: Date;
@@ -12,6 +13,7 @@ export interface DbActiveTimer {
 function dbTimerToActiveTimer(dbTimer: DbActiveTimer): ActiveTimer {
   return {
     taskId: dbTimer.task_id,
+    date: dbTimer.date,
     startTime: Number(dbTimer.start_time),
     elapsedTime: Number(dbTimer.elapsed_time),
   };
@@ -39,11 +41,11 @@ export async function getActiveTimerByTask(taskId: string): Promise<ActiveTimer 
 
 export async function createOrUpdateActiveTimer(timer: ActiveTimer): Promise<ActiveTimer> {
   await query(
-    `INSERT INTO active_timers (task_id, start_time, elapsed_time)
-     VALUES ($1, $2, $3)
-     ON CONFLICT (task_id)
-     DO UPDATE SET start_time = $2, elapsed_time = $3`,
-    [timer.taskId, timer.startTime, timer.elapsedTime]
+    `INSERT INTO active_timers (task_id, date, start_time, elapsed_time)
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (task_id, date)
+     DO UPDATE SET start_time = $3, elapsed_time = $4`,
+    [timer.taskId, timer.date, timer.startTime, timer.elapsedTime]
   );
 
   return timer;

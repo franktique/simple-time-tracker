@@ -48,14 +48,18 @@ export function useTimeTracker() {
   }, []);
 
   // Task management functions
-  const addTask = useCallback(async (name: string, parentId: string | null = null) => {
+  const addTask = useCallback(async (
+    name: string,
+    parentId: string | null = null,
+    trackingType?: 'manual' | 'automatic'
+  ) => {
     const id = Date.now().toString();
     const newTask: Task = {
       id,
       name,
       parentId,
       children: [],
-      trackingType: state.userPreferences.defaultTrackingType,
+      trackingType: trackingType || state.userPreferences.defaultTrackingType,
       isExpanded: false,
       order: Object.keys(state.tasks).length
     };
@@ -211,11 +215,11 @@ export function useTimeTracker() {
   }, []);
 
   // Timer functions
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const startTimer = useCallback(async (taskId: string, _date: string) => {
+  const startTimer = useCallback(async (taskId: string, date: string) => {
     const now = Date.now();
     const timer: ActiveTimer = {
       taskId,
+      date,
       startTime: now,
       elapsedTime: 0
     };

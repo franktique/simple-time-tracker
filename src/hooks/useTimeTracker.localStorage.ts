@@ -155,11 +155,11 @@ export function useTimeTracker() {
   }, []);
 
   // Timer functions
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const startTimer = useCallback((taskId: string, _date: string) => {
+  const startTimer = useCallback((taskId: string, date: string) => {
     const now = Date.now();
     const timer: ActiveTimer = {
       taskId,
+      date,
       startTime: now,
       elapsedTime: 0
     };

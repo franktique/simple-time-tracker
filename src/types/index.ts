@@ -19,6 +19,7 @@ export interface TimeEntry {
 
 export interface ActiveTimer {
   taskId: string;
+  date: string; // YYYY-MM-DD format - the specific date/cell being tracked
   startTime: number;
   elapsedTime: number; // in milliseconds
 }

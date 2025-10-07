@@ -7,6 +7,7 @@ import { Header } from './Header';
 import { TaskSidebar } from './TaskSidebar';
 import { TimeGrid } from './TimeGrid';
 import { TaskTimeRow } from './TaskTimeRow';
+import { TaskDialog } from './TaskDialog';
 
 export function TimeTrackerApp() {
   const {
@@ -24,15 +25,21 @@ export function TimeTrackerApp() {
   // Hover state for task highlighting
   const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null);
 
+  // Task creation dialog state
+  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
+  const [taskDialogParentId, setTaskDialogParentId] = useState<string | null>(null);
+
   const handleTaskAdd = (parentId: string | null) => {
-    const name = prompt('Enter task name:');
-    if (name?.trim()) {
-      addTask(name.trim(), parentId);
-    }
+    setTaskDialogParentId(parentId);
+    setIsTaskDialogOpen(true);
   };
 
-  const handleTaskEdit = (taskId: string, name: string) => {
-    updateTask(taskId, { name });
+  const handleTaskCreate = (name: string, trackingType: 'manual' | 'automatic') => {
+    addTask(name, taskDialogParentId, trackingType);
+  };
+
+  const handleTaskEdit = (taskId: string, updates: { name?: string; trackingType?: 'manual' | 'automatic' }) => {
+    updateTask(taskId, updates);
   };
 
   if (state.isLoading) {
@@ -88,6 +95,13 @@ export function TimeTrackerApp() {
           </div>
         </div>
       </div>
+
+      <TaskDialog
+        isOpen={isTaskDialogOpen}
+        onClose={() => setIsTaskDialogOpen(false)}
+        onConfirm={handleTaskCreate}
+        defaultTrackingType={state.userPreferences.defaultTrackingType}
+      />
     </div>
   );
 }

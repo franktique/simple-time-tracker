@@ -1,6 +1,6 @@
 'use client';
 
-import { getDaysInMonth } from '@/utils/dateHelpers';
+import { getDaysInMonth, formatTime } from '@/utils/dateHelpers';
 import { TimeEntry } from '@/types';
 
 interface TimeGridProps {
@@ -132,7 +132,7 @@ export function TimeGrid({ currentMonth, timeEntries }: TimeGridProps) {
                     borderColor: 'var(--color-foreground)'
                   }}
                 >
-                  {dayNum <= days.length && totalMinutes > 0 && totalMinutes}
+                  {dayNum <= days.length && totalMinutes > 0 && formatTime(totalMinutes * 60 * 1000)}
                 </div>
               );
             })}

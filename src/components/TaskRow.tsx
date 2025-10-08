@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Task, TimeEntry } from '@/types';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { TaskEditDialog } from '@/components/TaskEditDialog';
 import { TaskCompletionDialog } from '@/components/TaskCompletionDialog';
@@ -117,6 +118,9 @@ export function TaskRow({
 
   const totalMinutes = calculateTaskMinutes(task.id);
 
+  // Check if task has time entries (determines if delete should be disabled)
+  const hasEntries = hasTaskTimeEntries(task.id, timeEntries);
+
   // Check if this task is being hovered from the time grid
   const isHighlighted = hoveredTaskId === task.id;
 
@@ -224,15 +228,33 @@ export function TaskRow({
 
           {/* Only show delete button for tasks without children */}
           {!hasChildren && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleDelete}
-              className="w-5 h-5 p-0 hover:bg-red-100 hover:text-red-600"
-              title="Delete task"
-            >
-              <Trash2 className="w-3 h-3" />
-            </Button>
+            <TooltipProvider delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleDelete}
+                      disabled={hasEntries}
+                      className={`w-5 h-5 p-0 ${
+                        hasEntries
+                          ? 'opacity-50 cursor-not-allowed'
+                          : 'hover:bg-red-100 hover:text-red-600'
+                      }`}
+                      title={hasEntries ? undefined : "Delete task"}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                {hasEntries && (
+                  <TooltipContent>
+                    <p>Cannot delete task with time entries</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
           )}
         </div>
       </div>

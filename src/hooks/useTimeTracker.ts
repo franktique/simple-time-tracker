@@ -1,14 +1,15 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { AppState, Task, ActiveTimer } from '@/types';
-import { tasksAPI, timeEntriesAPI, timersAPI, preferencesAPI } from '@/lib/api-client';
+import { AppState, Task, ActiveTimer, CheckEntry } from '@/types';
+import { tasksAPI, timeEntriesAPI, timersAPI, preferencesAPI, checkEntriesAPI } from '@/lib/api-client';
 import { getCurrentMonth } from '@/utils/dateHelpers';
 
 export function useTimeTracker() {
   const [state, setState] = useState<AppState>(() => ({
     tasks: {},
     timeEntries: {},
+    checkEntries: {},
     activeTimers: {},
     currentMonth: getCurrentMonth(),
     userPreferences: {
@@ -23,9 +24,10 @@ export function useTimeTracker() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [tasks, timeEntries, activeTimers, userPreferences] = await Promise.all([
+        const [tasks, timeEntries, checkEntries, activeTimers, userPreferences] = await Promise.all([
           tasksAPI.getAll(),
           timeEntriesAPI.getAll(),
+          checkEntriesAPI.getAll(),
           timersAPI.getAll(),
           preferencesAPI.get(),
         ]);
@@ -33,6 +35,7 @@ export function useTimeTracker() {
         setState({
           tasks,
           timeEntries,
+          checkEntries,
           activeTimers,
           currentMonth: getCurrentMonth(),
           userPreferences,
@@ -51,7 +54,7 @@ export function useTimeTracker() {
   const addTask = useCallback(async (
     name: string,
     parentId: string | null = null,
-    trackingType?: 'manual' | 'automatic'
+    trackingType?: 'manual' | 'automatic' | 'unique' | 'habit'
   ) => {
     const id = Date.now().toString();
     const newTask: Task = {
@@ -290,6 +293,43 @@ export function useTimeTracker() {
     }
   }, [state.activeTimers, state.timeEntries]);
 
+  // Check entry functions
+  const toggleCheckEntry = useCallback(async (taskId: string, date: string, isChecked: boolean) => {
+    const entryId = `${taskId}-${date}`;
+    const task = state.tasks[taskId];
+
+    if (!task) return;
+
+    try {
+      const entry = {
+        id: entryId,
+        taskId,
+        date,
+        isChecked,
+        createdAt: new Date()
+      };
+
+      await checkEntriesAPI.upsert(entry);
+
+      setState(prev => ({
+        ...prev,
+        checkEntries: { ...prev.checkEntries, [entryId]: entry }
+      }));
+
+      // For unique tracking, if checked, mark task as completed
+      if (task.trackingType === 'unique' && isChecked) {
+        await updateTask(taskId, { isCompleted: true });
+      }
+    } catch (error) {
+      console.error('Failed to toggle check entry:', error);
+    }
+  }, [state.tasks, updateTask]);
+
+  const getCheckEntry = useCallback((taskId: string, date: string): CheckEntry | undefined => {
+    const entryId = `${taskId}-${date}`;
+    return state.checkEntries[entryId];
+  }, [state.checkEntries]);
+
   // Month navigation
   const setCurrentMonth = useCallback((month: string) => {
     setState(prev => ({ ...prev, currentMonth: month }));
@@ -340,6 +380,8 @@ export function useTimeTracker() {
     toggleTask,
     toggleTaskComplete,
     updateTimeEntry,
+    toggleCheckEntry,
+    getCheckEntry,
     startTimer,
     stopTimer,
     setCurrentMonth

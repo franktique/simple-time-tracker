@@ -3,7 +3,7 @@ export interface Task {
   name: string;
   parentId: string | null;
   children: string[];
-  trackingType: 'manual' | 'automatic';
+  trackingType: 'manual' | 'automatic' | 'unique' | 'habit';
   isExpanded: boolean;
   isCompleted: boolean;
   order: number;
@@ -18,6 +18,14 @@ export interface TimeEntry {
   startTime?: number; // timestamp for active timers
 }
 
+export interface CheckEntry {
+  id: string;
+  taskId: string;
+  date: string; // YYYY-MM-DD format
+  isChecked: boolean;
+  createdAt: Date;
+}
+
 export interface ActiveTimer {
   taskId: string;
   date: string; // YYYY-MM-DD format - the specific date/cell being tracked
@@ -27,13 +35,14 @@ export interface ActiveTimer {
 
 export interface UserPreferences {
   theme: 'light' | 'dark' | 'system';
-  defaultTrackingType: 'manual' | 'automatic';
+  defaultTrackingType: 'manual' | 'automatic' | 'unique' | 'habit';
   timeFormat: '12h' | '24h';
 }
 
 export interface AppState {
   tasks: Record<string, Task>;
   timeEntries: Record<string, TimeEntry>;
+  checkEntries: Record<string, CheckEntry>;
   activeTimers: Record<string, ActiveTimer>;
   currentMonth: string; // YYYY-MM format
   userPreferences: UserPreferences;

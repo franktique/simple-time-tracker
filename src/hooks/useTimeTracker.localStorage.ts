@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { AppState, Task, TimeEntry, ActiveTimer } from '@/types';
+import { AppState, Task, TimeEntry, ActiveTimer, CheckEntry } from '@/types';
 import { StorageManager } from '@/utils/storage';
 import { getCurrentMonth } from '@/utils/dateHelpers';
 
@@ -9,6 +9,7 @@ export function useTimeTracker() {
   const [state, setState] = useState<AppState>(() => ({
     tasks: {},
     timeEntries: {},
+    checkEntries: {},
     activeTimers: {},
     currentMonth: getCurrentMonth(),
     userPreferences: {
@@ -208,6 +209,40 @@ export function useTimeTracker() {
     });
   }, []);
 
+  // Check entry functions
+  const toggleCheckEntry = useCallback(async (taskId: string, date: string, isChecked: boolean) => {
+    const entryId = `${taskId}-${date}`;
+    const task = state.tasks[taskId];
+
+    if (!task) return;
+
+    const entry = {
+      id: entryId,
+      taskId,
+      date,
+      isChecked,
+      createdAt: new Date()
+    };
+
+    setState(prev => ({
+      ...prev,
+      checkEntries: { ...prev.checkEntries, [entryId]: entry }
+    }));
+
+    // Save to localStorage
+    StorageManager.saveCheckEntries({ ...state.checkEntries, [entryId]: entry });
+
+    // For unique tracking, if checked, mark task as completed
+    if (task.trackingType === 'unique' && isChecked) {
+      await updateTask(taskId, { isCompleted: true });
+    }
+  }, [state.tasks, state.checkEntries, updateTask]);
+
+  const getCheckEntry = useCallback((taskId: string, date: string): CheckEntry | undefined => {
+    const entryId = `${taskId}-${date}`;
+    return state.checkEntries[entryId];
+  }, [state.checkEntries]);
+
   // Month navigation
   const setCurrentMonth = useCallback((month: string) => {
     setState(prev => ({ ...prev, currentMonth: month }));
@@ -256,6 +291,8 @@ export function useTimeTracker() {
     toggleTask,
     toggleTaskComplete,
     updateTimeEntry,
+    toggleCheckEntry,
+    getCheckEntry,
     startTimer,
     stopTimer,
     setCurrentMonth

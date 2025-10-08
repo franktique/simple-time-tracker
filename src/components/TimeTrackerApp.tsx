@@ -22,7 +22,8 @@ export function TimeTrackerApp() {
     getCheckEntry,
     startTimer,
     stopTimer,
-    setCurrentMonth
+    setCurrentMonth,
+    toggleHideCompleted
   } = useTimeTracker();
 
   // Hover state for task highlighting
@@ -58,7 +59,7 @@ export function TimeTrackerApp() {
   }
 
   // Get flattened list of visible tasks using shared utility
-  const visibleTasks = getVisibleTasks(state.tasks);
+  const visibleTasks = getVisibleTasks(state.tasks, state.userPreferences.hideCompleted);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-foreground)' }}>
@@ -66,6 +67,8 @@ export function TimeTrackerApp() {
         currentMonth={state.currentMonth}
         onMonthChange={setCurrentMonth}
         userName="Franklyn Tique"
+        hideCompleted={state.userPreferences.hideCompleted}
+        onToggleHideCompleted={toggleHideCompleted}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -79,6 +82,7 @@ export function TimeTrackerApp() {
           onTaskDelete={deleteTask}
           onTaskToggleComplete={handleTaskToggleComplete}
           hoveredTaskId={hoveredTaskId}
+          hideCompleted={state.userPreferences.hideCompleted}
         />
 
         <div className="flex-1 flex flex-col overflow-hidden">

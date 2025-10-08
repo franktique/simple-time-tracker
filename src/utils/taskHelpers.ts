@@ -4,10 +4,15 @@ import { Task, TimeEntry } from '@/types';
  * Gets the flattened list of visible tasks in the exact same order as they appear in the sidebar
  * This ensures perfect alignment between sidebar tasks and time grid rows
  */
-export function getVisibleTasks(tasks: Record<string, Task>): Task[] {
+export function getVisibleTasks(tasks: Record<string, Task>, hideCompleted: boolean = false): Task[] {
   const visibleTasks: Task[] = [];
 
   const addTaskAndChildren = (task: Task) => {
+    // Skip task if it should be hidden
+    if (shouldHideTask(task, tasks, hideCompleted)) {
+      return;
+    }
+
     visibleTasks.push(task);
     if (task.isExpanded && task.children.length > 0) {
       const children = task.children
@@ -68,4 +73,40 @@ export function hasTaskTimeEntries(taskId: string, timeEntries: Record<string, T
  */
 export function canChangeTrackingType(task: Task, timeEntries: Record<string, TimeEntry>): boolean {
   return !task.children.length && !hasTaskTimeEntries(task.id, timeEntries);
+}
+
+/**
+ * Checks if a task is fully completed
+ * A task is fully completed if:
+ * 1. It is marked as completed, OR
+ * 2. It has children and ALL children are recursively fully completed
+ */
+export function isTaskFullyCompleted(task: Task, tasks: Record<string, Task>): boolean {
+  // If task is directly marked as completed
+  if (task.isCompleted) {
+    return true;
+  }
+
+  // If task has no children, and is not marked completed, it's not fully completed
+  if (task.children.length === 0) {
+    return false;
+  }
+
+  // If task has children, check if ALL children are fully completed
+  return task.children.every(childId => {
+    const child = tasks[childId];
+    if (!child) return false;
+    return isTaskFullyCompleted(child, tasks);
+  });
+}
+
+/**
+ * Determines if a task should be hidden based on the hideCompleted filter
+ */
+export function shouldHideTask(task: Task, tasks: Record<string, Task>, hideCompleted: boolean): boolean {
+  if (!hideCompleted) {
+    return false;
+  }
+
+  return isTaskFullyCompleted(task, tasks);
 }

@@ -15,7 +15,8 @@ export function useTimeTracker() {
     userPreferences: {
       theme: 'system',
       defaultTrackingType: 'manual',
-      timeFormat: '24h'
+      timeFormat: '24h',
+      hideCompleted: false
     },
     isLoading: true
   }));
@@ -335,6 +336,25 @@ export function useTimeTracker() {
     setState(prev => ({ ...prev, currentMonth: month }));
   }, []);
 
+  // Hide completed toggle
+  const toggleHideCompleted = useCallback(async () => {
+    const newValue = !state.userPreferences.hideCompleted;
+
+    try {
+      await preferencesAPI.update({ hideCompleted: newValue });
+
+      setState(prev => ({
+        ...prev,
+        userPreferences: {
+          ...prev.userPreferences,
+          hideCompleted: newValue
+        }
+      }));
+    } catch (error) {
+      console.error('Failed to update hide completed preference:', error);
+    }
+  }, [state.userPreferences.hideCompleted]);
+
   // Initialize with sample data if no tasks exist
   useEffect(() => {
     if (!state.isLoading && Object.keys(state.tasks).length === 0) {
@@ -384,6 +404,7 @@ export function useTimeTracker() {
     getCheckEntry,
     startTimer,
     stopTimer,
-    setCurrentMonth
+    setCurrentMonth,
+    toggleHideCompleted
   };
 }

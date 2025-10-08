@@ -37,6 +37,7 @@ export interface UserPreferences {
   theme: 'light' | 'dark' | 'system';
   defaultTrackingType: 'manual' | 'automatic' | 'unique' | 'habit';
   timeFormat: '12h' | '24h';
+  hideCompleted: boolean;
 }
 
 export interface AppState {

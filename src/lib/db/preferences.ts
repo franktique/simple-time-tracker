@@ -6,6 +6,7 @@ export interface DbUserPreferences {
   theme: 'light' | 'dark' | 'system';
   default_tracking_type: 'manual' | 'automatic';
   time_format: '12h' | '24h';
+  hide_completed: boolean;
   created_at: Date;
   updated_at: Date;
 }
@@ -15,6 +16,7 @@ function dbPreferencesToUserPreferences(dbPrefs: DbUserPreferences): UserPrefere
     theme: dbPrefs.theme,
     defaultTrackingType: dbPrefs.default_tracking_type,
     timeFormat: dbPrefs.time_format,
+    hideCompleted: dbPrefs.hide_completed,
   };
 }
 
@@ -29,6 +31,7 @@ export async function getUserPreferences(): Promise<UserPreferences> {
       theme: 'system',
       defaultTrackingType: 'manual',
       timeFormat: '24h',
+      hideCompleted: false,
     };
   }
 
@@ -51,6 +54,10 @@ export async function updateUserPreferences(preferences: Partial<UserPreferences
   if (preferences.timeFormat !== undefined) {
     fields.push(`time_format = $${paramIndex++}`);
     values.push(preferences.timeFormat);
+  }
+  if (preferences.hideCompleted !== undefined) {
+    fields.push(`hide_completed = $${paramIndex++}`);
+    values.push(preferences.hideCompleted);
   }
 
   if (fields.length > 0) {

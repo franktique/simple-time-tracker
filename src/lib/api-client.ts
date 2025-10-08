@@ -115,3 +115,38 @@ export const preferencesAPI = {
     body: JSON.stringify(updates),
   }),
 };
+
+// Export/Import API
+export interface ExportData {
+  version: string;
+  exportDate: string;
+  data: {
+    tasks: Record<string, Task>;
+    timeEntries: Record<string, TimeEntry>;
+    checkEntries: Record<string, CheckEntry>;
+    activeTimers: Record<string, ActiveTimer>;
+    userPreferences: UserPreferences;
+  };
+}
+
+export interface ImportResponse {
+  success: boolean;
+  message: string;
+  stats: {
+    tasks: number;
+    timeEntries: number;
+    checkEntries: number;
+    activeTimers: number;
+  };
+}
+
+export const exportAPI = {
+  getAll: () => fetchAPI<ExportData>('/export'),
+};
+
+export const importAPI = {
+  uploadData: (data: ExportData) => fetchAPI<ImportResponse>('/import', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+};

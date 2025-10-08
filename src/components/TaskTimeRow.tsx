@@ -96,6 +96,7 @@ export function TaskTimeRow({
                 onToggleCheck={onToggleCheck}
                 trackingType={task.trackingType}
                 taskCompleted={task.isCompleted}
+                isToday={dayData.isToday}
               />
             </div>
           );
@@ -121,6 +122,7 @@ export function TaskTimeRow({
               onStartTimer={onStartTimer}
               onStopTimer={onStopTimer}
               isCurrentMonth={dayData.isCurrentMonth}
+              isToday={dayData.isToday}
             />
           </div>
         );

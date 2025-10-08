@@ -10,6 +10,7 @@ interface CheckmarkCellProps {
   disabled?: boolean;
   trackingType: 'unique' | 'habit';
   taskCompleted?: boolean;
+  isToday?: boolean;
 }
 
 export function CheckmarkCell({
@@ -19,7 +20,8 @@ export function CheckmarkCell({
   onToggleCheck,
   disabled = false,
   trackingType,
-  taskCompleted = false
+  taskCompleted = false,
+  isToday = false
 }: CheckmarkCellProps) {
   const handleClick = () => {
     if (disabled) return;
@@ -70,21 +72,28 @@ export function CheckmarkCell({
 
   return (
     <div
-      className={getCellStyle()}
-      onClick={handleClick}
-      title={getTitle()}
-      role="button"
-      tabIndex={disabled ? -1 : 0}
-      onKeyDown={(e) => {
-        if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
-          e.preventDefault();
-          handleClick();
-        }
+      className="w-full h-full flex items-center justify-center"
+      style={{
+        backgroundColor: isToday ? 'var(--color-orange-light, #dbeafe)' : 'transparent'
       }}
-      aria-pressed={isChecked}
-      aria-label={`Check mark for ${date}, ${isChecked ? 'checked' : 'unchecked'}`}
     >
-      {getIcon()}
+      <div
+        className={getCellStyle()}
+        onClick={handleClick}
+        title={getTitle()}
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        onKeyDown={(e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
+            e.preventDefault();
+            handleClick();
+          }
+        }}
+        aria-pressed={isChecked}
+        aria-label={`Check mark for ${date}, ${isChecked ? 'checked' : 'unchecked'}`}
+      >
+        {getIcon()}
+      </div>
     </div>
   );
 }

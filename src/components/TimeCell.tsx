@@ -15,6 +15,7 @@ interface TimeCellProps {
   onStartTimer: (taskId: string, date: string) => void;
   onStopTimer: (taskId: string, date: string) => void;
   isCurrentMonth?: boolean;
+  isToday?: boolean;
 }
 
 export function TimeCell({
@@ -25,7 +26,8 @@ export function TimeCell({
   onUpdateTime,
   onStartTimer,
   onStopTimer,
-  isCurrentMonth = true
+  isCurrentMonth = true,
+  isToday = false
 }: TimeCellProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -154,18 +156,18 @@ export function TimeCell({
       <div
         className="h-full w-full flex items-center justify-center text-sm relative group cursor-pointer"
         style={{
-          backgroundColor: hasTimer ? 'var(--color-orange-light, #dbeafe)' : 'transparent'
+          backgroundColor: hasTimer ? 'var(--color-orange-light, #dbeafe)' : (isToday ? 'var(--color-orange-light, #dbeafe)' : 'transparent')
         }}
         onMouseEnter={(e) => {
           setIsHovered(true);
-          if (task.trackingType === 'manual' && !hasTimer) {
+          if (task.trackingType === 'manual' && !hasTimer && !isToday) {
             e.currentTarget.style.backgroundColor = 'var(--color-orange-light, rgba(0,0,0,0.05))';
           }
         }}
         onMouseLeave={(e) => {
           setIsHovered(false);
           if (task.trackingType === 'manual' && !hasTimer) {
-            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.backgroundColor = isToday ? 'var(--color-orange-light, #dbeafe)' : 'transparent';
           }
         }}
         onClick={handleCellClick}

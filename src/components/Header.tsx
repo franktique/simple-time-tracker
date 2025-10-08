@@ -2,6 +2,8 @@
 
 import { formatMonth, getNextMonth, getPreviousMonth } from '@/utils/dateHelpers';
 import { ThemeToggle } from './ThemeToggle';
+import { ExportButton } from './ExportButton';
+import { ImportButton } from './ImportButton';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -68,6 +70,8 @@ export function Header({ currentMonth, onMonthChange, userName = 'User' }: Heade
       </div>
 
       <div className="flex items-center gap-2">
+        <ExportButton />
+        <ImportButton />
         <ThemeToggle />
         <Button
           className="bg-orange-500 hover:bg-orange-600 text-white"

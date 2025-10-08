@@ -1,8 +1,9 @@
-import { Task, TimeEntry, ActiveTimer, UserPreferences, AppState } from '@/types';
+import { Task, TimeEntry, ActiveTimer, UserPreferences, AppState, CheckEntry } from '@/types';
 
 const STORAGE_KEYS = {
   TASKS: 'timetracker-tasks',
   TIME_ENTRIES: 'timetracker-entries',
+  CHECK_ENTRIES: 'timetracker-check-entries',
   ACTIVE_TIMERS: 'timetracker-timers',
   PREFERENCES: 'timetracker-preferences',
   VERSION: 'timetracker-version'
@@ -53,7 +54,7 @@ export class StorageManager {
   }
 
   static loadTasks(): Record<string, Task> {
-    const tasks = this.loadData(STORAGE_KEYS.TASKS, {});
+    const tasks = this.loadData<Record<string, Task>>(STORAGE_KEYS.TASKS, {});
 
     // If no tasks exist, create sample hierarchical data
     if (Object.keys(tasks).length === 0) {
@@ -61,8 +62,7 @@ export class StorageManager {
     }
 
     // Migrate existing tasks to include isCompleted field
-    Object.keys(tasks).forEach(taskId => {
-      const task = tasks[taskId];
+    Object.values(tasks).forEach((task) => {
       if (task.isCompleted === undefined) {
         task.isCompleted = false;
       }
@@ -111,6 +111,14 @@ export class StorageManager {
     return this.loadData(STORAGE_KEYS.TIME_ENTRIES, {});
   }
 
+  static saveCheckEntries(entries: Record<string, CheckEntry>): void {
+    this.saveData(STORAGE_KEYS.CHECK_ENTRIES, entries);
+  }
+
+  static loadCheckEntries(): Record<string, CheckEntry> {
+    return this.loadData(STORAGE_KEYS.CHECK_ENTRIES, {});
+  }
+
   static saveActiveTimers(timers: Record<string, ActiveTimer>): void {
     this.saveData(STORAGE_KEYS.ACTIVE_TIMERS, timers, true);
   }
@@ -137,6 +145,7 @@ export class StorageManager {
     return {
       tasks: this.loadTasks(),
       timeEntries: this.loadTimeEntries(),
+      checkEntries: this.loadCheckEntries(),
       activeTimers: this.loadActiveTimers(),
       currentMonth: new Date().toISOString().slice(0, 7),
       userPreferences: this.loadPreferences(),

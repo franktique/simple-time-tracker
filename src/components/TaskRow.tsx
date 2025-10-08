@@ -17,7 +17,7 @@ interface TaskRowProps {
   currentMonth: string;
   level: number;
   onToggle: (taskId: string) => void;
-  onEdit: (taskId: string, updates: { name?: string; trackingType?: 'manual' | 'automatic' }) => void;
+  onEdit: (taskId: string, updates: { name?: string; trackingType?: 'manual' | 'automatic' | 'unique' | 'habit' }) => void;
   onDelete: (taskId: string) => void;
   onAdd: (parentId: string | null) => void;
   onToggleComplete: (taskId: string) => void;
@@ -57,7 +57,7 @@ export function TaskRow({
     setShowEditDialog(true);
   };
 
-  const handleEditConfirm = (updates: { name?: string; trackingType?: 'manual' | 'automatic' }) => {
+  const handleEditConfirm = (updates: { name?: string; trackingType?: 'manual' | 'automatic' | 'unique' | 'habit' }) => {
     onEdit(task.id, updates);
     setShowEditDialog(false);
   };

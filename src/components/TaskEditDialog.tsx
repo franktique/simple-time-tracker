@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Task, TimeEntry } from '@/types';
+import { Task } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TrackingTypeSelector } from '@/components/TrackingTypeSelector';
@@ -9,7 +9,7 @@ import { TrackingTypeSelector } from '@/components/TrackingTypeSelector';
 interface TaskEditDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (updates: { name?: string; trackingType?: 'manual' | 'automatic' }) => void;
+  onConfirm: (updates: { name?: string; trackingType?: 'manual' | 'automatic' | 'unique' | 'habit' }) => void;
   task: Task;
   hasTimeEntries: boolean;
 }
@@ -26,7 +26,7 @@ export function TaskEditDialog({
   hasTimeEntries
 }: TaskEditDialogProps) {
   const [name, setName] = useState(task.name);
-  const [trackingType, setTrackingType] = useState<'manual' | 'automatic'>(task.trackingType);
+  const [trackingType, setTrackingType] = useState<'manual' | 'automatic' | 'unique' | 'habit'>(task.trackingType);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Check if tracking type can be changed
@@ -46,7 +46,7 @@ export function TaskEditDialog({
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
     if (name.trim()) {
-      const updates: { name?: string; trackingType?: 'manual' | 'automatic' } = {};
+      const updates: { name?: string; trackingType?: 'manual' | 'automatic' | 'unique' | 'habit' } = {};
 
       if (name.trim() !== task.name) {
         updates.name = name.trim();

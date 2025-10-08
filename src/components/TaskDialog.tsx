@@ -8,8 +8,8 @@ import { TrackingTypeSelector } from '@/components/TrackingTypeSelector';
 interface TaskDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (name: string, trackingType: 'manual' | 'automatic') => void;
-  defaultTrackingType: 'manual' | 'automatic';
+  onConfirm: (name: string, trackingType: 'manual' | 'automatic' | 'unique' | 'habit') => void;
+  defaultTrackingType: 'manual' | 'automatic' | 'unique' | 'habit';
   title?: string;
 }
 
@@ -24,7 +24,7 @@ export function TaskDialog({
   title = 'Create New Task'
 }: TaskDialogProps) {
   const [name, setName] = useState('');
-  const [trackingType, setTrackingType] = useState<'manual' | 'automatic'>(defaultTrackingType);
+  const [trackingType, setTrackingType] = useState<'manual' | 'automatic' | 'unique' | 'habit'>(defaultTrackingType);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {

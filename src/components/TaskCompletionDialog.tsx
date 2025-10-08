@@ -53,13 +53,13 @@ export function TaskCompletionDialog({
           <DialogDescription>
             {isCompleting ? (
               <>
-                Are you sure you want to mark "{task?.name}" as completed?
+                Are you sure you want to mark &quot;{task?.name}&quot; as completed?
                 <br />
                 This will help you track your progress and organize your tasks better.
               </>
             ) : (
               <>
-                Are you sure you want to mark "{task?.name}" as incomplete?
+                Are you sure you want to mark &quot;{task?.name}&quot; as incomplete?
                 <br />
                 This will remove the completion status and you can track time for this task again.
               </>

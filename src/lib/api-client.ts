@@ -1,4 +1,4 @@
-import { Task, TimeEntry, ActiveTimer, UserPreferences } from '@/types';
+import { Task, TimeEntry, ActiveTimer, UserPreferences, CheckEntry } from '@/types';
 
 const API_BASE = '/api';
 
@@ -77,6 +77,31 @@ export const timersAPI = {
     }),
 
   stop: (taskId: string) => fetchAPI<{ success: boolean }>(`/timers/${taskId}`, {
+    method: 'DELETE',
+  }),
+};
+
+// Check Entries API
+export const checkEntriesAPI = {
+  getAll: () => fetchAPI<Record<string, CheckEntry>>('/check-entries'),
+
+  getByDateRange: (startDate: string, endDate: string) =>
+    fetchAPI<Record<string, CheckEntry>>(`/check-entries?startDate=${startDate}&endDate=${endDate}`),
+
+  getByTask: (taskId: string) => fetchAPI<CheckEntry[]>(`/check-entries/task/${taskId}`),
+
+  getById: (id: string) => fetchAPI<CheckEntry>(`/check-entries/${id}`),
+
+  upsert: (entry: CheckEntry) => fetchAPI<CheckEntry>('/check-entries', {
+    method: 'POST',
+    body: JSON.stringify(entry),
+  }),
+
+  delete: (id: string) => fetchAPI<{ success: boolean }>(`/check-entries/${id}`, {
+    method: 'DELETE',
+  }),
+
+  deleteByTask: (taskId: string) => fetchAPI<{ success: boolean }>(`/check-entries/task/${taskId}`, {
     method: 'DELETE',
   }),
 };

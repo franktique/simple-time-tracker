@@ -5,7 +5,7 @@ export interface DbTask {
   id: string;
   name: string;
   parent_id: string | null;
-  tracking_type: 'manual' | 'automatic';
+  tracking_type: 'manual' | 'automatic' | 'unique' | 'habit';
   is_expanded: boolean;
   is_completed: boolean;
   order: number;

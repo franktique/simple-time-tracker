@@ -18,6 +18,8 @@ export function TimeTrackerApp() {
     toggleTask,
     toggleTaskComplete,
     updateTimeEntry,
+    toggleCheckEntry,
+    getCheckEntry,
     startTimer,
     stopTimer,
     setCurrentMonth
@@ -35,11 +37,11 @@ export function TimeTrackerApp() {
     setIsTaskDialogOpen(true);
   };
 
-  const handleTaskCreate = (name: string, trackingType: 'manual' | 'automatic') => {
+  const handleTaskCreate = (name: string, trackingType: 'manual' | 'automatic' | 'unique' | 'habit') => {
     addTask(name, taskDialogParentId, trackingType);
   };
 
-  const handleTaskEdit = (taskId: string, updates: { name?: string; trackingType?: 'manual' | 'automatic' }) => {
+  const handleTaskEdit = (taskId: string, updates: { name?: string; trackingType?: 'manual' | 'automatic' | 'unique' | 'habit' }) => {
     updateTask(taskId, updates);
   };
 
@@ -93,6 +95,8 @@ export function TimeTrackerApp() {
                 currentMonth={state.currentMonth}
                 level={0}
                 onUpdateTime={updateTimeEntry}
+                onToggleCheck={toggleCheckEntry}
+                getCheckEntry={getCheckEntry}
                 onStartTimer={startTimer}
                 onStopTimer={stopTimer}
                 onTaskHover={setHoveredTaskId}

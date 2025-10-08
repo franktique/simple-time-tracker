@@ -11,9 +11,11 @@ interface HeaderProps {
   currentMonth: string;
   onMonthChange: (month: string) => void;
   userName?: string;
+  hideCompleted: boolean;
+  onToggleHideCompleted: () => void;
 }
 
-export function Header({ currentMonth, onMonthChange, userName = 'User' }: HeaderProps) {
+export function Header({ currentMonth, onMonthChange, userName = 'User', hideCompleted, onToggleHideCompleted }: HeaderProps) {
   const handlePreviousMonth = () => {
     onMonthChange(getPreviousMonth(currentMonth));
   };
@@ -70,6 +72,17 @@ export function Header({ currentMonth, onMonthChange, userName = 'User' }: Heade
       </div>
 
       <div className="flex items-center gap-2">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={hideCompleted}
+            onChange={onToggleHideCompleted}
+            className="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500 cursor-pointer"
+          />
+          <span className="text-sm" style={{ color: 'var(--color-foreground)' }}>
+            Hide completed
+          </span>
+        </label>
         <ExportButton />
         <ImportButton />
         <ThemeToggle />

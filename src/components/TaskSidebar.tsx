@@ -4,6 +4,7 @@ import { Task, TimeEntry } from "@/types";
 import { TaskRow } from "./TaskRow";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
+import { shouldHideTask } from "@/utils/taskHelpers";
 
 interface TaskSidebarProps {
   tasks: Record<string, Task>;
@@ -15,6 +16,7 @@ interface TaskSidebarProps {
   onTaskDelete: (taskId: string) => void;
   onTaskToggleComplete: (taskId: string) => void;
   hoveredTaskId: string | null;
+  hideCompleted: boolean;
 }
 
 export function TaskSidebar({
@@ -27,9 +29,11 @@ export function TaskSidebar({
   onTaskDelete,
   onTaskToggleComplete,
   hoveredTaskId,
+  hideCompleted,
 }: TaskSidebarProps) {
   const rootTasks = Object.values(tasks)
     .filter((task) => task.parentId === null)
+    .filter((task) => !shouldHideTask(task, tasks, hideCompleted))
     .sort((a, b) => a.order - b.order);
 
   const getTotalHours = () => {
@@ -120,6 +124,7 @@ export function TaskSidebar({
               onAdd={onTaskAdd}
               onToggleComplete={onTaskToggleComplete}
               hoveredTaskId={hoveredTaskId}
+              hideCompleted={hideCompleted}
             />
           ))}
 

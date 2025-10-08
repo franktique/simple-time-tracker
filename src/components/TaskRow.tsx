@@ -8,7 +8,7 @@ import { TaskEditDialog } from '@/components/TaskEditDialog';
 import { TaskCompletionDialog } from '@/components/TaskCompletionDialog';
 import { ChevronRight, Play, Edit3, Plus, Trash2, CheckCircle, RotateCcw } from 'lucide-react';
 import { formatTime } from '@/utils/dateHelpers';
-import { hasTaskTimeEntries } from '@/utils/taskHelpers';
+import { hasTaskTimeEntries, shouldHideTask } from '@/utils/taskHelpers';
 
 interface TaskRowProps {
   task: Task;
@@ -22,6 +22,7 @@ interface TaskRowProps {
   onAdd: (parentId: string | null) => void;
   onToggleComplete: (taskId: string) => void;
   hoveredTaskId: string | null;
+  hideCompleted: boolean;
 }
 
 export function TaskRow({
@@ -35,7 +36,8 @@ export function TaskRow({
   onDelete,
   onAdd,
   onToggleComplete,
-  hoveredTaskId
+  hoveredTaskId,
+  hideCompleted
 }: TaskRowProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -45,6 +47,7 @@ export function TaskRow({
   const childTasks = task.children
     .map(childId => tasks[childId])
     .filter(Boolean)
+    .filter(childTask => !shouldHideTask(childTask, tasks, hideCompleted))
     .sort((a, b) => a.order - b.order);
 
   const handleToggle = () => {
@@ -249,6 +252,7 @@ export function TaskRow({
           onAdd={onAdd}
           onToggleComplete={onToggleComplete}
           hoveredTaskId={hoveredTaskId}
+          hideCompleted={hideCompleted}
         />
       ))}
 

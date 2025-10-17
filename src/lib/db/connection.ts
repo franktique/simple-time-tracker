@@ -2,12 +2,27 @@ import { Pool, PoolClient } from 'pg';
 
 let pool: Pool | null = null;
 
+// Helper function to clean DATABASE_URL (remove quotes if present)
+function cleanDatabaseUrl(url: string | undefined): string | undefined {
+  if (!url) return url;
+
+  // Remove surrounding quotes (single or double)
+  let cleaned = url.trim();
+  if ((cleaned.startsWith("'") && cleaned.endsWith("'")) ||
+      (cleaned.startsWith('"') && cleaned.endsWith('"'))) {
+    cleaned = cleaned.slice(1, -1);
+  }
+
+  return cleaned;
+}
+
 export function getPool(): Pool {
   if (!pool) {
     // Use DATABASE_URL if available (includes SSL params), otherwise use individual env vars
-    const config = process.env.DATABASE_URL
+    const databaseUrl = cleanDatabaseUrl(process.env.DATABASE_URL);
+    const config = databaseUrl
       ? {
-          connectionString: process.env.DATABASE_URL,
+          connectionString: databaseUrl,
           ssl: {
             rejectUnauthorized: false,
           },

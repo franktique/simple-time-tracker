@@ -36,6 +36,9 @@ export async function GET() {
       },
       environment: {
         hasDatabaseUrl: !!process.env.DATABASE_URL,
+        databaseUrlLength: process.env.DATABASE_URL?.length || 0,
+        databaseUrlPreview: process.env.DATABASE_URL?.substring(0, 50) + '...',
+        databaseUrlHasQuotes: process.env.DATABASE_URL?.startsWith("'") || process.env.DATABASE_URL?.startsWith('"'),
         hasDbHost: !!process.env.DB_HOST,
         hasDbName: !!process.env.DB_NAME,
         nodeEnv: process.env.NODE_ENV,
@@ -50,6 +53,9 @@ export async function GET() {
         stack: error instanceof Error ? error.stack : undefined,
         environment: {
           hasDatabaseUrl: !!process.env.DATABASE_URL,
+          databaseUrlLength: process.env.DATABASE_URL?.length || 0,
+          databaseUrlPreview: process.env.DATABASE_URL?.substring(0, 50) + '...',
+          databaseUrlHasQuotes: process.env.DATABASE_URL?.startsWith("'") || process.env.DATABASE_URL?.startsWith('"'),
           hasDbHost: !!process.env.DB_HOST,
           hasDbName: !!process.env.DB_NAME,
           nodeEnv: process.env.NODE_ENV,

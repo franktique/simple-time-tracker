@@ -13,6 +13,9 @@ export function getPool(): Pool {
       max: 20,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 2000,
+      ssl: process.env.DB_HOST?.includes('neon.tech')
+        ? { rejectUnauthorized: false }
+        : false,
     });
 
     pool.on('error', (err) => {

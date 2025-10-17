@@ -1,3 +1,6 @@
+// Load environment variables with custom priority (.env first, then .env.local)
+require('../load-env');
+
 const { Pool } = require('pg');
 
 async function runMigration() {

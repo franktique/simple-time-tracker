@@ -1,3 +1,6 @@
+// Load environment variables with custom priority (.env first, then .env.local)
+import '../load-env';
+
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { getPool, closePool } from '../src/lib/db/connection';

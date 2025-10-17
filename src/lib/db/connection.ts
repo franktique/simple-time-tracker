@@ -4,19 +4,32 @@ let pool: Pool | null = null;
 
 export function getPool(): Pool {
   if (!pool) {
-    pool = new Pool({
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '5432'),
-      database: process.env.DB_NAME || 'simple-tracker',
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
-      ssl: process.env.DB_HOST?.includes('neon.tech')
-        ? { rejectUnauthorized: false }
-        : false,
-    });
+    // Use DATABASE_URL if available (includes SSL params), otherwise use individual env vars
+    const config = process.env.DATABASE_URL
+      ? {
+          connectionString: process.env.DATABASE_URL,
+          ssl: {
+            rejectUnauthorized: false,
+          },
+          max: 20,
+          idleTimeoutMillis: 30000,
+          connectionTimeoutMillis: 2000,
+        }
+      : {
+          host: process.env.DB_HOST || 'localhost',
+          port: parseInt(process.env.DB_PORT || '5432'),
+          database: process.env.DB_NAME || 'simple-tracker',
+          user: process.env.DB_USER,
+          password: process.env.DB_PASSWORD,
+          max: 20,
+          idleTimeoutMillis: 30000,
+          connectionTimeoutMillis: 2000,
+          ssl: process.env.DB_HOST?.includes('neon.tech')
+            ? { rejectUnauthorized: false }
+            : false,
+        };
+
+    pool = new Pool(config);
 
     pool.on('error', (err) => {
       console.error('Unexpected error on idle client', err);

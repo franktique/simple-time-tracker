@@ -135,7 +135,8 @@ export class StorageManager {
     return this.loadData(STORAGE_KEYS.PREFERENCES, {
       theme: 'system',
       defaultTrackingType: 'manual',
-      timeFormat: '24h'
+      timeFormat: '24h',
+      hideCompleted: false
     });
   }
 

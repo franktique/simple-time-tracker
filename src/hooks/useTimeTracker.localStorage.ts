@@ -15,7 +15,8 @@ export function useTimeTracker() {
     userPreferences: {
       theme: 'system',
       defaultTrackingType: 'manual',
-      timeFormat: '24h'
+      timeFormat: '24h',
+      hideCompleted: false
     },
     isLoading: true
   }));
